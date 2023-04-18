@@ -64,9 +64,15 @@ app.post('/registerUser', async (req, res) => {
 	}
 	const user = await User.register(schemaUser);
 	if (user.status == false) {
-		return res.status(404).send("The email already exists!")
+		return res.status(404).json({
+			success: false,
+			msg: "The email already exists!"
+		})
 	} 
-	return res.status(200).send("User Registeration Success")	
+	return res.status(200).json({
+		success: true,
+		msg: "User Registeration Success"
+	})	
 })
 
 app.post('/loginUser', async (req, res) => {
@@ -75,10 +81,13 @@ app.post('/loginUser', async (req, res) => {
 	const user = await User.login(req.body.UserName, req.body.UserPassword);
 
 	if (user.status == "Invalid password" || user.status == "Invalid username" ) {
-		return res.status(404).send("Login failed")
+		return res.status(404).json({
+			success: false,
+			msg: "Login failed"})
 	}
 
 	res.status(200).json({
+		success: true,
 		UserName: user.UserName,
 		UserEmail: user.UserEmail,
 		role: user.role,
