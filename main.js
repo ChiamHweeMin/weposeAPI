@@ -1,8 +1,10 @@
+require('dotenv').config();
 const { MongoClient, ObjectId } = require("mongodb");
 const User = require("./user");
 
 MongoClient.connect(
-    "mongodb+srv://chiam:chiam@cluster0.an2vt5v.mongodb.net/weposeAPI",
+    // "mongodb+srv://chiam:chiam@cluster0.an2vt5v.mongodb.net/weposeAPI",
+	process.env.MONGO_URI,
 	{ useNewUrlParser: true },
 ).catch(err => {
 	console.error(err.stack)
