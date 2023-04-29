@@ -11,20 +11,26 @@ class User {
 		// Check if user's name exists
         const isExists = await user.findOne({ UserEmail: sample.UserEmail })
 		if (isExists) {
-			return { status: false }
+			return { status: false, msg: "Email exists" }
 		} else {
 			// Hash the password
 			const passwordHash = bcrypt.hashSync(sample.UserPassword, 10);
-			// Store the user info into database	
-			await user.insertOne({
-                UserName: sample.UserName,
-				UserPassword: passwordHash,
-				UserEmail: sample.UserEmail,
-				role: "user"
-			}).then (result => {
-				console.log(result)
-			})
-			return { status: true }
+			// Confirm the password is correct
+			const isMatch = await bcrypt.compare(sample.UserConfirmPassword, passwordHash)
+			if (isMatch) {
+				// Store the user info into database	
+				await user.insertOne({
+					UserName: sample.UserName,
+					UserPassword: passwordHash,
+					UserEmail: sample.UserEmail,
+					role: "user"
+				}).then (result => {
+					console.log(result)
+				})
+				return { status: true, msg: "Success" }
+			} else {
+				return { status: false, msg: "Passwords do not match" }
+			}	
 		}
 	}
 

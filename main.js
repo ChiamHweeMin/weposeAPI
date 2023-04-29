@@ -60,19 +60,28 @@ app.post('/registerUser', async (req, res) => {
 	schemaUser = {
 		UserName: req.body.UserName,
 		UserPassword: req.body.UserPassword,
+		UserConfirmPassword: req.body.UserConfirmPassword,
 		UserEmail: req.body.UserEmail
 	}
 	const user = await User.register(schemaUser);
-	if (user.status == false) {
+	if (user.msg == "Email exists") {
 		return res.status(404).json({
 			success: false,
 			msg: "The email already exists!"
 		})
-	} 
-	return res.status(200).json({
-		success: true,
-		msg: "User Registeration Success"
-	})	
+	}
+	if (user.msg == "Passwords do not match") {
+		return res.status(404).json({
+			success: false,
+			msg: "Passwords do NOT match!"
+		})
+	}
+	if (user.status == true) {
+		return res.status(200).json({
+			success: true,
+			msg: "User Registeration Success"
+		})
+	}    
 })
 
 app.post('/loginUser', async (req, res) => {
