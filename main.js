@@ -121,15 +121,15 @@ app.patch('/UserProfile/UpdateUserName', verifyToken, async (req, res) => {
 				success: false,
 				msg: "Update failed"})
 		} 
-		if (user.status == true) {
-			return res.status(200).json({
-				success: true,
-				msg: "Username updated!",
-				UserName: user.UserName,
-				UserEmail: user.UserEmail,
-				role: user.role,
-			})
-		}
+		
+		return res.status(200).json({
+			success: true,
+			msg: "Username updated!",
+			UserName: user.UserName,
+			UserEmail: user.UserEmail,
+			role: user.role,
+	})			
+		
 	} else {
 		return res.status(403).json({
 			success: false,
