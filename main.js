@@ -112,7 +112,7 @@ app.patch('/UserProfile/UpdateUserName', verifyToken, async (req, res) => {
 		console.log("Update Username:")
 		console.log(req.body);
 		schemaUser = {
-			UserEmail: req.params.UserEmail,
+			UserEmail: req.body.UserEmail,
 			UserName: req.body.UserName
 		}
 		const user = await User.updateUserName(schemaUser);
@@ -122,12 +122,12 @@ app.patch('/UserProfile/UpdateUserName', verifyToken, async (req, res) => {
 				msg: "Update failed"})
 		} 
 		if (user.status == true) {
-				return res.status(200).json({
-					success: true,
-					msg: "Username updated!",
-					UserName: user.UserName,
-					UserEmail: user.UserEmail,
-					role: user.role,
+			return res.status(200).json({
+				success: true,
+				msg: "Username updated!",
+				UserName: user.UserName,
+				UserEmail: user.UserEmail,
+				role: user.role,
 			})
 		}
 	} else {
