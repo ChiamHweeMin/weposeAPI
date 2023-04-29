@@ -107,7 +107,7 @@ app.post('/loginUser', async (req, res) => {
 	})
 })
 
-app.post('/UserProfile/UpdateUserName', verifyToken, async (req, res) => {
+app.patch('/UserProfile/UpdateUserName', verifyToken, async (req, res) => {
 	if (req.user.role == 'user') {
 		console.log("Update Username:")
 		console.log(req.body);
