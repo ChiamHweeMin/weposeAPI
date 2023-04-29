@@ -57,6 +57,7 @@ class User {
 		const isExists = await user.findOne({ UserEmail: sample.UserEmail })
 		if (isExists) {
 			// Update the fields UserName
+			console.log("Email match")
 			await user.updateOne({
             	UserEmail: sample.UserEmail
             }, { 
@@ -69,6 +70,7 @@ class User {
 			return await user.findOne({ UserEmail: sample.UserEmail })
 		}
 		else {
+			console.log("Email not match")
 			return { status: false }
 		}
 	}
