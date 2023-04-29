@@ -67,9 +67,10 @@ class User {
 			}).then (result => {
                 console.log(result)
             }).catch((err) => {
-				console.log('Error: ' + err);
-			})
-			return await user.findOne({ UserEmail: sample.UserEmail })
+                    console.log('Error: ' + err);
+                })
+			const data = await user.findOne({ UserEmail: sample.UserEmail })
+			return { data, status: true }
 		}
 		else {
 			console.log("Email not match")
