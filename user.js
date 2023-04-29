@@ -66,7 +66,9 @@ class User {
 				} 
 			}).then (result => {
                 console.log(result)
-            })
+            }).catch((err) => {
+				console.log('Error: ' + err);
+			})
 			return await user.findOne({ UserEmail: sample.UserEmail })
 		}
 		else {
