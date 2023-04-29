@@ -52,6 +52,38 @@ class User {
 		}
 	}
 
+	static async updateUserName(sample) {
+		// Check if user exists
+		const isExists = await user.findOne({ UserEmail: sample.UserEmail })
+		if (isExists) {
+			// Update the fields UserName
+			await user.updateOne({
+            	UserEmail: sample.UserEmail
+            }, { 
+				$set: {
+					UserName: sample.UserName
+				} 
+			}).then (result => {
+                console.log(result)
+            })
+			return await user.findOne({ UserEmail: sample.UserEmail })
+		}
+		else {
+			return { status: false }
+		}
+	}
+
+	static async delete(email, name) {
+		const isExists = await visitors.findOne({ UserEmail: email, UserName: name })
+		if (isExists) {
+			await user.deleteOne({ UserEmail: email, UserName: name }).then (result => {
+                console.log(result.deletedCount)
+            })
+            return { status: true, msg: "Deleted" }
+		}
+		return { status: false, msg: "Not Found" }
+	}
+
 	static async updateGeneralUser(sample) {
 		// Check if user exists
 		const isExists = await user.findOne({ UserName: sample.UserName })

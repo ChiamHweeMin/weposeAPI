@@ -101,21 +101,59 @@ app.post('/loginUser', async (req, res) => {
 		UserEmail: user.UserEmail,
 		role: user.role,
 		token: generateAccessToken({
-			UserName: user.UserName,
+			UserEmail: user.UserEmail,
 			role: user.role
 		})
 	})
 })
 
-
-app.get('/user/view', verifyToken, async (req, res) => {
+app.post('/UserProfile/UpdateUserName', verifyToken, async (req, res) => {
 	if (req.user.role == 'user') {
-
+		console.log("Update Username:")
+		console.log(req.body);
+		schemaUser = {
+			UserEmail: req.params.UserEmail,
+			UserName: req.body.UserName
+		}
+		const user = await User.updateUserName(schemaUser);
+		if (user.status == false) {
+			return res.status(404).json({
+				success: false,
+				msg: "Update failed"})
+		} 
+		res.status(200).json({
+			success: true,
+			msg: "Username updated!",
+			UserName: user.UserName,
+			UserEmail: user.UserEmail,
+			role: user.role,
+		})
 	} else {
-
-	}
+		return res.status(403).json({
+			success: false,
+			msg: 'Unauthorized'})
+	}	
 })
 
+app.delete('/UserProfile/DeleteUser/:UserEmail', verifyToken, async (req, res) => {
+	if (req.user.role == 'user') {
+		const user = await User.delete(req.params.UserEmail, req.body.UserName);
+		if (user.status == "Not Found") {
+			return res.status(404).json({
+				success: false,
+				msg: "Failed to delete"})
+		}
+		else {
+			return res.status(200).json({
+				success: true,
+				msg: "The account is deleted"})
+		}
+	} else {
+		return res.status(403).json({
+			success: false,
+			msg: 'Unauthorized'})
+	}
+})
 
 app.listen(port, () => {
 	console.log(`Example app listening on port ${port}`)
