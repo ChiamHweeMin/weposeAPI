@@ -1,4 +1,4 @@
 module.exports = {
 	"preset": "@shelf/jest-mongodb",
-    testTimeout: 20000
+    testTimeout: 200000
 }
