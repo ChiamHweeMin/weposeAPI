@@ -107,12 +107,12 @@ app.post('/loginUser', async (req, res) => {
 	})
 })
 
-app.patch('/UserProfile/UpdateUserName', verifyToken, async (req, res) => {
+app.patch('/UserProfile/UpdateUserName/:UserEmail', verifyToken, async (req, res) => {
 	if (req.user.role == 'user') {
 		console.log("Update Username:")
 		console.log(req.body);
 		schemaUser = {
-			UserEmail: req.body.UserEmail,
+			UserEmail: req.params.UserEmail,
 			UserName: req.body.UserName
 		}
 		const user = await User.updateUserName(schemaUser);
