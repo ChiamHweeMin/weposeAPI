@@ -78,6 +78,43 @@ class User {
 		}
 	}
 
+	static async updateUserPassword(sample) {
+		// Check if user exists
+		const isExists = await user.findOne({ UserEmail: sample.UserEmail })
+		if (isExists) {
+			// Check if the old password is matched with the one saved in database
+			const isOldPasswordMatch = await bcrypt.compare(sample.UserOldPassword, isExists.UserPassword)
+			if (isOldPasswordMatch) {
+				// Hash the new password
+				const passwordHash = bcrypt.hashSync(sample.UserNewPassword, 10);
+				// Check if the new password is matched with the confirm password
+				const isNewPasswordMatch = await bcrypt.compare(sample.UserNewConfirmPassword, passwordHash) 
+				if (isNewPasswordMatch) {
+					await user.updateOne({
+						UserEmail: sample.UserEmail
+					}, { 
+						$set: {
+							UserPassword: passwordHash
+						} 
+					}).then (result => {
+						console.log(result)
+					}).catch((err) => {
+							console.log('Error: ' + err);
+						})
+					return { status: true, msg: "Success" }
+
+				} else {
+					return { status: false, msg: "New password and confirm password do not match"}
+				}
+			} else {
+				return { status: false, msg: "Incorrect old password" }
+			}
+		} else {
+			console.log("Email not match")
+			return { status: false, msg: "Email is not exits" }
+		}
+	}
+
 	static async delete(email, name) {
 		const isExists = await visitors.findOne({ UserEmail: email, UserName: name })
 		if (isExists) {
@@ -88,28 +125,6 @@ class User {
 		}
 		return { status: false, msg: "Not Found" }
 	}
-
-	static async updateGeneralUser(sample) {
-		// Check if user exists
-		const isExists = await user.findOne({ UserName: sample.UserName })
-		if (isExists) {
-			// Update the fields except for UserName and UserPassword
-			await user.updateOne({
-            	UserName: sample.UserName
-            }, { 
-				$set: {
-					UserEmail: sample.UserEmail
-				} 
-			}).then (result => {
-                console.log(result)
-            })
-			return await user.findOne({ UserName: sample.UserName })
-		}
-		else {
-			return { status: false }
-		}
-	}
-
 
 }
 

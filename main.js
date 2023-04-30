@@ -137,6 +137,45 @@ app.patch('/UserProfile/UpdateUserName', verifyToken, async (req, res) => {
 	}	
 })
 
+app.patch('/UserProfile/UpdateUserPassword', verifyToken, async (req, res) => {
+	if (req.user.role == 'user') {
+		console.log("Update User Password:")
+		console.log(req.body);
+		schemaUser = {
+			UserEmail: req.body.UserEmail,
+			UserOldPassword: req.body.UserOldPassword,
+			UserNewPassword: req.body.UserNewPassword,
+			UserNewConfirmPassword: req.body.UserNewConfirmPassword
+		}
+		const user = await User.updateUserPassword(schemaUser);
+		if (user.msg == "New password and confirm password do not match") {
+			return res.status(404).json({
+				success: false,
+				msg: "New password and confirm password do not match!"})
+		} 
+		if (user.msg == "Incorrect old password") {
+			return res.status(404).json({
+				success: false,
+				msg: "Incorrect old password!"})
+		} 
+		if (user.msg == "Email not match") {
+			return res.status(404).json({
+				success: false,
+				msg: "Email do not match!"})
+		} 
+		if (user.status == true) {
+			return res.status(200).json({
+				success: true,
+				msg: "Password updated!"
+			})
+		} 		
+	} else {
+		return res.status(403).json({
+			success: false,
+			msg: 'Unauthorized'})
+	}	
+})
+
 app.delete('/UserProfile/DeleteUser/:UserEmail', verifyToken, async (req, res) => {
 	if (req.user.role == 'user') {
 		const user = await User.delete(req.params.UserEmail, req.body.UserName);
