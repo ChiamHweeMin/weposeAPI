@@ -115,7 +115,7 @@ class User {
 	}
 
 	static async delete(email) {
-		const isExists = await visitors.findOne({ UserEmail: email })
+		const isExists = await user.findOne({ UserEmail: email })
 		if (isExists) {
 			await user.deleteOne({ UserEmail: email}).then (result => {
                 console.log(result.deletedCount)
