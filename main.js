@@ -186,7 +186,7 @@ app.delete('/UserProfile/DeleteAccount', verifyToken, async (req, res) => {
 				success: false,
 				msg: "Email is not exits!"})
 		}
-		else {
+		if (user.status == true ) {
 			return res.status(200).json({
 				success: true,
 				msg: "The account is deleted!"})
