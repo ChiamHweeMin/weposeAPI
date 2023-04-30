@@ -176,18 +176,18 @@ app.patch('/UserProfile/UpdateUserPassword', verifyToken, async (req, res) => {
 	}	
 })
 
-app.delete('/UserProfile/DeleteUser/:UserEmail', verifyToken, async (req, res) => {
+app.delete('/UserProfile/DeleteAccount', verifyToken, async (req, res) => {
 	if (req.user.role == 'user') {
-		const user = await User.delete(req.params.UserEmail, req.body.UserName);
-		if (user.status == "Not Found") {
+		const user = await User.delete(req.body.UserEmail);
+		if (user.status == false) {
 			return res.status(404).json({
 				success: false,
-				msg: "Failed to delete"})
+				msg: "Email is not exits!"})
 		}
 		else {
 			return res.status(200).json({
 				success: true,
-				msg: "The account is deleted"})
+				msg: "The account is deleted!"})
 		}
 	} else {
 		return res.status(403).json({
