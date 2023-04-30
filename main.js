@@ -158,10 +158,10 @@ app.patch('/UserProfile/UpdateUserPassword', verifyToken, async (req, res) => {
 				success: false,
 				msg: "Incorrect old password!"})
 		} 
-		if (user.msg == "Email not match") {
+		if (user.msg == "Email is not exits") {
 			return res.status(404).json({
 				success: false,
-				msg: "Email do not match!"})
+				msg: "Email is not exits!"})
 		} 
 		if (user.status == true) {
 			return res.status(200).json({

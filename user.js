@@ -110,7 +110,6 @@ class User {
 				return { status: false, msg: "Incorrect old password" }
 			}
 		} else {
-			console.log("Email not match")
 			return { status: false, msg: "Email is not exits" }
 		}
 	}
