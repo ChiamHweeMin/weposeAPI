@@ -176,11 +176,11 @@ app.patch('/UserProfile/UpdateUserPassword', verifyToken, async (req, res) => {
 	}	
 })
 
-app.delete('/UserProfile/DeleteAccount', verifyToken, async (req, res) => {
+app.delete('/UserProfile/DeleteAccount/:UserEmail', verifyToken, async (req, res) => {
 	if (req.user.role == 'user') {
 		console.log("Delete Account:")
 		console.log(req.body);
-		const user = await User.delete(req.body.UserEmail);
+		const user = await User.delete(req.params.UserEmail);
 		if (user.status == false) {
 			return res.status(404).json({
 				success: false,
