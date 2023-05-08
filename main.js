@@ -205,6 +205,11 @@ app.post('/WEPOSE/SendDataIMU', async (req, res) => {
 	res.status(200).json(data);
 })
 
+app.get('/test', async (req, res) => {
+	console.log("Testing...");
+	return res.status(200).json({msg: "Hello World"});
+})
+
 app.listen(port, () => {
 	console.log(`Example app listening on port ${port}`)
 })
