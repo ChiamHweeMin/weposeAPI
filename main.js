@@ -198,26 +198,11 @@ app.delete('/UserProfile/DeleteAccount/:UserEmail', verifyToken, async (req, res
 	}
 })
 
-app.get('/WEPOSE/SendDataIMU'), async (req, res) => {
-	if (req.user.role == 'user') {
-		console.log("Delete Account:")
-		console.log(req.body);
-		const user = await User.delete(req.params.UserEmail);
-		if (user.status == false) {
-			return res.status(404).json({
-				success: false,
-				msg: "Email is not exits!"})
-		}
-		if (user.status == true ) {
-			return res.status(200).json({
-				success: true,
-				msg: "The account is deleted!"})
-		}
-	} else {
-		return res.status(403).json({
-			success: false,
-			msg: 'Unauthorized'})
-	}
+app.post('/WEPOSE/SendDataIMU', async (req, res) => {
+	console.log("Send and Receive IMU data:")
+	const data = req.body; // get the data from the request body
+	console.log(data);
+	res.status(200).json(data);
 })
 
 app.listen(port, () => {
