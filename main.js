@@ -207,7 +207,7 @@ app.post('/WEPOSE/SendDataIMU', async (req, res) => {
 
 app.get('/test', async (req, res) => {
 	console.log("Testing...");
-	return res.status(200).json({msg: "Hello World"});
+	return res.status(200).send("Hello World");
 })
 
 app.listen(port, () => {
