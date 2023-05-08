@@ -199,7 +199,7 @@ app.delete('/UserProfile/DeleteAccount/:UserEmail', verifyToken, async (req, res
 })
 
 app.post('/WEPOSE/SendDataIMU', async (req, res) => {
-	console.log("Send and Receive IMU data:")
+	console.log("Send and Receive IMU data:");
 	const data = req.body; // get the data from the request body
 	console.log(data);
 	res.status(200).json(data);
