@@ -18,6 +18,8 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000
 
+const dataIMU = {};
+
 const swaggerUi = require('swagger-ui-express')
 const swaggerJsdoc = require('swagger-jsdoc')
 const options = {
@@ -198,13 +200,24 @@ app.delete('/UserProfile/DeleteAccount/:UserEmail', verifyToken, async (req, res
 	}
 })
 
+// define POST route to receive data
 app.post('/WEPOSE/SendDataIMU', async (req, res) => {
-	console.log("Send and Receive IMU data:");
-	const data = req.body; // get the data from the request body
-	console.log(data);
-	res.status(200).json(data);
-})
-
+	console.log("Sending IMU data....");
+	dataIMU = req.body; // get the data from the request body
+	console.log(dataIMU);
+	res.status(200).send("Data received!");
+});
+  
+// define GET route to retrieve data
+app.get('/WEPOSE/SendDataIMU', async (req, res) => {
+	if (dataIMU != null) {
+	  console.log("Receiving IMU data.....");
+	  console.log(dataIMU);
+	  res.status(200).json(dataIMU);
+	} else {
+	  res.status(404).send("The data has not been sent.");
+	}
+});
 app.get('/test', async (req, res) => {
 	console.log("Testing...");
 	return res.status(200).send("Hello World");
