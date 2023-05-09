@@ -223,7 +223,15 @@ app.get('/WEPOSE/SendDataIMU', async (req, res) => {
 	if (dataIMU != null) {
 	  console.log("Receiving IMU data.....");
 	//   console.log(dataIMU);
-	  res.status(200).json(dataIMU);
+	  return res.status(200).json({
+		"success": true,
+		"accel_x": dataIMU.accel_x,
+		"accel_y": dataIMU.accel_y,
+		"accel_z": dataIMU.accel_z,
+		"gyro_x": dataIMU.gyro_x,
+		"gyro_y": dataIMU.gyro_y,
+		"gyro_z": dataIMU.gyro_z
+	  })	
 	} else {
 	  res.status(404).json({msg: "The data has not been sent."});
 	}
