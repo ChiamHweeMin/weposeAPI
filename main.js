@@ -18,7 +18,7 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000
 
-const dataIMU = {};
+let dataIMU = {};
 
 const swaggerUi = require('swagger-ui-express')
 const swaggerJsdoc = require('swagger-jsdoc')
