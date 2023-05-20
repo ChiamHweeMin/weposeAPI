@@ -68,7 +68,7 @@ class User {
                 console.log(result)
             }).catch((err) => {
                     console.log('Error: ' + err);
-                })
+            })
 			const data = await user.findOne({ UserEmail: sample.UserEmail })
 			return data
 		}
@@ -124,6 +124,36 @@ class User {
 		}
 		return { status: false, msg: "Email is not exits" }
 	}
+
+	static async updateUserInitSitData(email, sample) {
+		// Check if user exists
+		const isExists = await user.findOne({ UserEmail: email })
+		if (isExists) {
+			// Update the field Init Sit Data
+			console.log("Email match")
+			await user.updateOne({
+            	UserEmail: email,
+            }, { 
+				$set: {
+					InitSitData: {
+						serializedModel: sample.serializedModel
+					}
+				} 
+			}, { upsert: true }).then (result => {
+                console.log(result)
+            }).catch((err) => {
+                    console.log('Error: ' + err);
+            })
+			const data = await user.findOne({ UserEmail: sample.UserEmail })
+			return data
+		}
+		else {
+			console.log("Email not match")
+			return { status: false }
+		}
+	}
+
+
 
 }
 
