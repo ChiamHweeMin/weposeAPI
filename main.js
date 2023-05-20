@@ -24,6 +24,8 @@ const port = process.env.PORT || 3000
 let dataIMU = {};
 let inlierData = [];  // Variable to store the inlier data
 let n = 0;
+// Create a new KNN classifier
+const classifier = new KNNClassifier();
 
 const swaggerUi = require('swagger-ui-express')
 const swaggerJsdoc = require('swagger-jsdoc')
@@ -262,8 +264,7 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		inlierData = [];  // Clear previous inlier data
 		console.log("Initialization:")
 
-		// Create a new KNN classifier
-		const classifier = new KNNClassifier();
+
 
 
 		while (n < 20) {
