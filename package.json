@@ -10,6 +10,8 @@
   "author": "chiam",
   "license": "ISC",
   "dependencies": {
+    "@tensorflow-models/knn-classifier": "^1.2.4",
+    "@tensorflow/tfjs": "^4.6.0",
     "bcryptjs": "^2.4.3",
     "bufferutil": "^4.0.7",
     "dotenv": "^16.0.3",

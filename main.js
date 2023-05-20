@@ -1,8 +1,8 @@
 require('dotenv').config();
 const { MongoClient, ObjectId } = require("mongodb");
 const User = require("./user");
-const { OneClassSVM } = require('ml-classify-one-class-svm');
-const { StandardScaler } = require('ml-preprocessing');
+const tf = require('@tensorflow/tfjs');
+require('@tensorflow-models/knn-classifier');
 
 MongoClient.connect(
     // "mongodb+srv://chiam:chiam@cluster0.an2vt5v.mongodb.net/weposeAPI",
@@ -263,30 +263,53 @@ app.post('WEPOSE/:UserEmail/initSitPosture', async (req, res) => {
 		// dataIMU = req.body; // get the data from the request body
 		// inlierData.push([dataIMU.accel_x, dataIMU.accel_y, dataIMU.accel_z, dataIMU.gyro_x, dataIMU.gyro_y, dataIMU.gyro_z]);
 		// Start collecting inlier data for one minute
+		// const startTime = Date.now();
+		// while (Date.now() - startTime < 50000) {
+		// 	const { pitch, roll } = req.body;  // Get the data from the request body
+		// 	const dataPoint = { pitch, roll }; // Label the data as "proper" posture
+		// 	inlierData.push(dataPoint);
+		// 	await new Promise(resolve => setTimeout(resolve, 1000));  // Sleep for 1 second before collecting the next data point
+		// }
+
+
+		// const features = inlierData.map(data => [data.pitch, data.roll]);
+
+
+		// // Normalize the features
+		// const scaler = new StandardScaler();
+		// const normalizedFeatures = scaler.fitTransform(features);
+
+		// // Train the OC-SVM model using normalized features
+		// const model = new OneClassSVM({ nu: 0.1 }); // Adjust nu parameter as needed
+		// model.fit(normalizedFeatures);
+		// console.log(model)
+
+
+		// // Serialize the trained model
+		// const serializedModel = JSON.stringify(model);
+		// console.log(serializedModel)
+
+		// // Create a new model instance
+		// const modelInstance = new Model({
+		// 	name: 'Trained Model',
+		// 	serializedModel: serializedModel
+		// });
+
+		// Create a new KNN classifier
+		const classifier = knnClassifier.create();
+
+		// Collect inlier data for one minute
 		const startTime = Date.now();
-		while (Date.now() - startTime < 50000) {
-			const { pitch, roll } = req.body;  // Get the data from the request body
-			const dataPoint = { pitch, roll }; // Label the data as "proper" posture
-			inlierData.push(dataPoint);
-			await new Promise(resolve => setTimeout(resolve, 1000));  // Sleep for 1 second before collecting the next data point
+		while (Date.now() - startTime < 60000) {
+			const { pitch, roll } = req.body; // Get the data from the request body
+			const dataPoint = { pitch, roll, label: "straight" }; // Label the data as "proper" posture
+			const feature = tf.tensor1d([pitch, roll]);
+			classifier.addExample(feature, dataPoint.label);
+			await new Promise(resolve => setTimeout(resolve, 1000)); // Sleep for 1 second before collecting the next data point
 		}
 
-
-		const features = inlierData.map(data => [data.pitch, data.roll]);
-
-
-		// Normalize the features
-		const scaler = new StandardScaler();
-		const normalizedFeatures = scaler.fitTransform(features);
-
-		// Train the OC-SVM model using normalized features
-		const model = new OneClassSVM({ nu: 0.1 }); // Adjust nu parameter as needed
-		model.fit(normalizedFeatures);
-		console.log(model)
-
-
 		// Serialize the trained model
-		const serializedModel = JSON.stringify(model);
+		const serializedModel = JSON.stringify(classifier);
 		console.log(serializedModel)
 
 		// Create a new model instance
@@ -294,6 +317,11 @@ app.post('WEPOSE/:UserEmail/initSitPosture', async (req, res) => {
 			name: 'Trained Model',
 			serializedModel: serializedModel
 		});
+
+
+
+		// Save the trained model
+		// console.log('Model saved:', modelSaveResult);
 		const user = await User.updateUserInitSitData(req.params.UserEmail, modelInstance);
 
 		res.status(200).json({ msg: "Initialization complete. Model trained." });
