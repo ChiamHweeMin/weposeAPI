@@ -276,8 +276,6 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 			await new Promise(resolve => setTimeout(resolve, 3000)); // Sleep for 1 second before collecting the next data point
 		}
 
-		await classifier.save(); // This will save the model to the classifier instance
-
 
 		// Get the new data point from the request body
 		const { pitch, roll } = req.body;
