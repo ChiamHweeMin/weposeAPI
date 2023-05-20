@@ -23,6 +23,7 @@ const port = process.env.PORT || 3000
 
 let dataIMU = {};
 let inlierData = [];  // Variable to store the inlier data
+let n = 0;
 
 const swaggerUi = require('swagger-ui-express')
 const swaggerJsdoc = require('swagger-jsdoc')
@@ -263,8 +264,8 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		// Create a new KNN classifier
 		const classifier = new KNNClassifier();
 
-		let n = 0;
-		while (n < 60) {
+
+		while (n < 20) {
 			const { pitch, roll } = req.body; // Get the data from the request body
 			const dataPoint = { pitch, roll, label: "proper" }; // Label the data as "proper" posture
 			const feature = tf.tensor1d([pitch, roll]);
