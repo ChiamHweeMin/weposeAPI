@@ -267,7 +267,7 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 	try {
 		console.log("Initialization:")
 
-		while (n < 20) {
+		while (n < 60) {
 			const { pitch, roll } = req.body; // Get the data from the request body
 			const dataPoint = [pitch, roll]; // Use pitch and roll angles as input features
 			isolationForest.fit(dataPoint);
