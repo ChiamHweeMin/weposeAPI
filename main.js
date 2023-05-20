@@ -255,7 +255,7 @@ app.get('/WEPOSE/SendDataIMU', async (req, res) => {
 });
 
 // Initialization step : Collect correct data for user for further classification
-app.post('WEPOSE/initSitPosture', async (req, res) => {
+app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		inlierData = [];  // Clear previous inlier data
 		console.log("Initialization:")
 
