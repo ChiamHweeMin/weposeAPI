@@ -289,6 +289,7 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 
 		// Get the predicted label
 		const predictedLabel = result.label;
+		console.log(predictedLabel);
 
 		res.status(200).json({ label: predictedLabel });
 	} catch (error) {
