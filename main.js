@@ -258,6 +258,7 @@ app.get('/WEPOSE/SendDataIMU', async (req, res) => {
 
 // Initialization step : Collect correct data for user for further classification
 app.post('/WEPOSE/initSitPosture', async (req, res) => {
+	try {
 		inlierData = [];  // Clear previous inlier data
 		console.log("Initialization:")
 
@@ -282,7 +283,7 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		const feature = tf.tensor1d([pitch, roll]);
 
 		// Perform classification
-		if (classifier.isEmpty()) {
+		if (classifier.getClassExampleCount == 0) {
 			throw new Error('You have not added any examples to the KNN classifier.');
 		}
 		const result = await classifier.predictClass(feature);
@@ -291,6 +292,10 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		const predictedLabel = result.label;
 
 		res.status(200).json({ label: predictedLabel });
+	} catch (error) {
+		console.error('An error occurred:', error);
+		res.status(500).json({ error: 'Internal Server Error' });
+	  }
 
 })
 
