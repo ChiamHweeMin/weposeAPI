@@ -271,6 +271,8 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 			const feature = tf.tensor1d([pitch, roll]);
 			classifier.addExample(feature, dataPoint.label);
 			n++; // Increment the counter
+			await new Promise(resolve => setTimeout(resolve, 1000)); // Sleep for 1 second before collecting the next data point
+
 		}
 
 
