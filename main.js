@@ -255,45 +255,9 @@ app.get('/WEPOSE/SendDataIMU', async (req, res) => {
 });
 
 // Initialization step : Collect correct data for user for further classification
-app.post('WEPOSE/:UserEmail/initSitPosture', async (req, res) => {
-	if (req.user.role == 'user') {
+app.post('WEPOSE/initSitPosture', async (req, res) => {
 		inlierData = [];  // Clear previous inlier data
 		console.log("Initialization:")
-		// console.log(req.body);
-		// dataIMU = req.body; // get the data from the request body
-		// inlierData.push([dataIMU.accel_x, dataIMU.accel_y, dataIMU.accel_z, dataIMU.gyro_x, dataIMU.gyro_y, dataIMU.gyro_z]);
-		// Start collecting inlier data for one minute
-		// const startTime = Date.now();
-		// while (Date.now() - startTime < 50000) {
-		// 	const { pitch, roll } = req.body;  // Get the data from the request body
-		// 	const dataPoint = { pitch, roll }; // Label the data as "proper" posture
-		// 	inlierData.push(dataPoint);
-		// 	await new Promise(resolve => setTimeout(resolve, 1000));  // Sleep for 1 second before collecting the next data point
-		// }
-
-
-		// const features = inlierData.map(data => [data.pitch, data.roll]);
-
-
-		// // Normalize the features
-		// const scaler = new StandardScaler();
-		// const normalizedFeatures = scaler.fitTransform(features);
-
-		// // Train the OC-SVM model using normalized features
-		// const model = new OneClassSVM({ nu: 0.1 }); // Adjust nu parameter as needed
-		// model.fit(normalizedFeatures);
-		// console.log(model)
-
-
-		// // Serialize the trained model
-		// const serializedModel = JSON.stringify(model);
-		// console.log(serializedModel)
-
-		// // Create a new model instance
-		// const modelInstance = new Model({
-		// 	name: 'Trained Model',
-		// 	serializedModel: serializedModel
-		// });
 
 		// Create a new KNN classifier
 		const classifier = knnClassifier.create();
@@ -312,46 +276,108 @@ app.post('WEPOSE/:UserEmail/initSitPosture', async (req, res) => {
 		const serializedModel = JSON.stringify(classifier);
 		console.log(serializedModel)
 
-		// Create a new model instance
-		const modelInstance = new Model({
-			name: 'Trained Model',
-			serializedModel: serializedModel
-		});
-
-
-
-		// Save the trained model
-		// console.log('Model saved:', modelSaveResult);
-		const user = await User.updateUserInitSitData(req.params.UserEmail, modelInstance);
-
 		res.status(200).json({ msg: "Initialization complete. Model trained." });
-		// schemaData = {
-		// 	"accel_x": dataIMU.accel_x,
-		// 	"accel_y": dataIMU.accel_y,
-		// 	"accel_z": dataIMU.accel_z,
-		// 	"gyro_x": dataIMU.gyro_x,
-		// 	"gyro_y": dataIMU.gyro_y,
-		// 	"gyro_z": dataIMU.gyro_z
-		// }
-
-		// const user = await User.updateUserInitSitData(req.params.UserEmail, schemaData);
-		if (user.status == false) {
-			return res.status(404).json({
-				success: false,
-				msg: "Email is not exits!"})
-		}
-		if (user.status == true ) {
-			return res.status(200).json({
-				success: true,
-				msg: "The account is deleted!"})
-		}
-	} else {
-		return res.status(403).json({
-			success: false,
-			msg: 'Unauthorized'})
-	}
 
 })
+
+// // Initialization step : Collect correct data for user for further classification
+// app.post('WEPOSE/:UserEmail/initSitPosture', async (req, res) => {
+// 	if (req.user.role == 'user') {
+// 		inlierData = [];  // Clear previous inlier data
+// 		console.log("Initialization:")
+// 		// console.log(req.body);
+// 		// dataIMU = req.body; // get the data from the request body
+// 		// inlierData.push([dataIMU.accel_x, dataIMU.accel_y, dataIMU.accel_z, dataIMU.gyro_x, dataIMU.gyro_y, dataIMU.gyro_z]);
+// 		// Start collecting inlier data for one minute
+// 		// const startTime = Date.now();
+// 		// while (Date.now() - startTime < 50000) {
+// 		// 	const { pitch, roll } = req.body;  // Get the data from the request body
+// 		// 	const dataPoint = { pitch, roll }; // Label the data as "proper" posture
+// 		// 	inlierData.push(dataPoint);
+// 		// 	await new Promise(resolve => setTimeout(resolve, 1000));  // Sleep for 1 second before collecting the next data point
+// 		// }
+
+
+// 		// const features = inlierData.map(data => [data.pitch, data.roll]);
+
+
+// 		// // Normalize the features
+// 		// const scaler = new StandardScaler();
+// 		// const normalizedFeatures = scaler.fitTransform(features);
+
+// 		// // Train the OC-SVM model using normalized features
+// 		// const model = new OneClassSVM({ nu: 0.1 }); // Adjust nu parameter as needed
+// 		// model.fit(normalizedFeatures);
+// 		// console.log(model)
+
+
+// 		// // Serialize the trained model
+// 		// const serializedModel = JSON.stringify(model);
+// 		// console.log(serializedModel)
+
+// 		// // Create a new model instance
+// 		// const modelInstance = new Model({
+// 		// 	name: 'Trained Model',
+// 		// 	serializedModel: serializedModel
+// 		// });
+
+// 		// Create a new KNN classifier
+// 		const classifier = knnClassifier.create();
+
+// 		// Collect inlier data for one minute
+// 		const startTime = Date.now();
+// 		while (Date.now() - startTime < 60000) {
+// 			const { pitch, roll } = req.body; // Get the data from the request body
+// 			const dataPoint = { pitch, roll, label: "straight" }; // Label the data as "proper" posture
+// 			const feature = tf.tensor1d([pitch, roll]);
+// 			classifier.addExample(feature, dataPoint.label);
+// 			await new Promise(resolve => setTimeout(resolve, 1000)); // Sleep for 1 second before collecting the next data point
+// 		}
+
+// 		// Serialize the trained model
+// 		const serializedModel = JSON.stringify(classifier);
+// 		console.log(serializedModel)
+
+// 		// Create a new model instance
+// 		const modelInstance = new Model({
+// 			name: 'Trained Model',
+// 			serializedModel: serializedModel
+// 		});
+
+
+
+// 		// Save the trained model
+// 		// console.log('Model saved:', modelSaveResult);
+// 		const user = await User.updateUserInitSitData(req.params.UserEmail, modelInstance);
+
+// 		res.status(200).json({ msg: "Initialization complete. Model trained." });
+// 		// schemaData = {
+// 		// 	"accel_x": dataIMU.accel_x,
+// 		// 	"accel_y": dataIMU.accel_y,
+// 		// 	"accel_z": dataIMU.accel_z,
+// 		// 	"gyro_x": dataIMU.gyro_x,
+// 		// 	"gyro_y": dataIMU.gyro_y,
+// 		// 	"gyro_z": dataIMU.gyro_z
+// 		// }
+
+// 		// const user = await User.updateUserInitSitData(req.params.UserEmail, schemaData);
+// 		if (user.status == false) {
+// 			return res.status(404).json({
+// 				success: false,
+// 				msg: "Email is not exits!"})
+// 		}
+// 		if (user.status == true ) {
+// 			return res.status(200).json({
+// 				success: true,
+// 				msg: "The account is deleted!"})
+// 		}
+// 	} else {
+// 		return res.status(403).json({
+// 			success: false,
+// 			msg: 'Unauthorized'})
+// 	}
+
+// })
 
 // // Classification step : User can do classification based on the correct sitting data collected before
 // app.post('WEPOSE/:UserEmail/classifySitPosture', async (req, res) => {
