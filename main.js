@@ -4,6 +4,9 @@ const User = require("./user");
 const tf = require('@tensorflow/tfjs');
 const { KNNClassifier } = require('@tensorflow-models/knn-classifier');
 
+const { IsolationForest } = require('isolation-forest');
+
+
 
 MongoClient.connect(
     // "mongodb+srv://chiam:chiam@cluster0.an2vt5v.mongodb.net/weposeAPI",
@@ -22,7 +25,8 @@ const app = express()
 const port = process.env.PORT || 3000
 
 let dataIMU = {};
-let inlierData = [];  // Variable to store the inlier data
+// Create a new Isolation Forest instance
+const isolationForest = new IsolationForest();
 let n = 0;
 // Create a new KNN classifier
 const classifier = new KNNClassifier();
@@ -265,30 +269,41 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		console.log("Initialization:")
 
 
+		// Create a new SVM instance for one-class classification
+		const svmModel = new svm.SVM({
+		type: svm.ONE_CLASS,
+		kernel: svm.RBF,
+		});
+
+
 
 
 		while (n < 20) {
 			const { pitch, roll } = req.body; // Get the data from the request body
-			const dataPoint = { pitch, roll, label: "proper" }; // Label the data as "proper" posture
-			const feature = tf.tensor1d([pitch, roll]);
-			classifier.addExample(feature, dataPoint.label);
+			const dataPoint = [pitch, roll]; // Use pitch and roll angles as input features
+			isolationForest.fit(dataPoint);
 			n++; // Increment the counter
-			await new Promise(resolve => setTimeout(resolve, 3000)); // Sleep for 1 second before collecting the next data point
-		}
+			await new Promise(resolve => setTimeout(resolve, 3000)); // Sleep for 3 seconds before collecting the next data point
+		  }
 
 
 		// Get the new data point from the request body
 		const { pitch, roll } = req.body;
-		const feature = tf.tensor1d([pitch, roll]);
+		const dataPoint = [pitch, roll];
 
-		// Perform classification
-		if (classifier.getClassExampleCount() === 0) {
-			throw new Error('You have not added any examples to the KNN classifier.');
+		// Perform prediction
+		const anomalyScore = isolationForest.predict(dataPoint);
+
+		// Set a threshold to classify the data point as proper or not
+		const threshold = 0.5; // Adjust the threshold based on your dataset and desired trade-off between false positives and false negatives
+
+		let predictedLabel;
+		if (anomalyScore < threshold) {
+			redictedLabel = 'proper';
+		} else {
+			predictedLabel = 'not proper';
 		}
-		const result = await classifier.predictClass(feature);
 
-		// Get the predicted label
-		const predictedLabel = result.label;
 		console.log(predictedLabel);
 
 		res.status(200).json({ label: predictedLabel });
