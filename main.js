@@ -263,22 +263,28 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		// Create a new KNN classifier
 		const classifier = new KNNClassifier();
 
-
-		// Collect inlier data for one minute
-		const startTime = Date.now();
-		while (Date.now() - startTime < 60000) {
+		let n = 0;
+		while (n < 60) {
 			const { pitch, roll } = req.body; // Get the data from the request body
-			const dataPoint = { pitch, roll, label: "straight" }; // Label the data as "proper" posture
+			const dataPoint = { pitch, roll, label: "proper" }; // Label the data as "proper" posture
 			const feature = tf.tensor1d([pitch, roll]);
 			classifier.addExample(feature, dataPoint.label);
-			await new Promise(resolve => setTimeout(resolve, 1000)); // Sleep for 1 second before collecting the next data point
+			n++; // Increment the counter
 		}
 
-		// Serialize the trained model
-		const serializedModel = JSON.stringify(classifier);
-		console.log(serializedModel)
 
-		res.status(200).json({ msg: "Initialization complete. Model trained." });
+
+		// Get the new data point from the request body
+		const { pitch, roll } = req.body;
+		const feature = tf.tensor1d([pitch, roll]);
+
+		// Perform classification
+		const result = await classifier.predictClass(feature);
+
+		// Get the predicted label
+		const predictedLabel = result.label;
+
+		res.status(200).json({ label: predictedLabel });
 
 })
 
