@@ -265,18 +265,7 @@ app.get('/WEPOSE/SendDataIMU', async (req, res) => {
 // Initialization step : Collect correct data for user for further classification
 app.post('/WEPOSE/initSitPosture', async (req, res) => {
 	try {
-		inlierData = [];  // Clear previous inlier data
 		console.log("Initialization:")
-
-
-		// Create a new SVM instance for one-class classification
-		const svmModel = new svm.SVM({
-		type: svm.ONE_CLASS,
-		kernel: svm.RBF,
-		});
-
-
-
 
 		while (n < 20) {
 			const { pitch, roll } = req.body; // Get the data from the request body
