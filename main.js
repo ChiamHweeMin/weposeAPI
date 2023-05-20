@@ -271,7 +271,7 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 			const feature = tf.tensor1d([pitch, roll]);
 			classifier.addExample(feature, dataPoint.label);
 			n++; // Increment the counter
-			await new Promise(resolve => setTimeout(resolve, 1000)); // Sleep for 1 second before collecting the next data point
+			await new Promise(resolve => setTimeout(resolve, 5000)); // Sleep for 1 second before collecting the next data point
 
 		}
 
@@ -282,6 +282,9 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		const feature = tf.tensor1d([pitch, roll]);
 
 		// Perform classification
+		if (classifier.isEmpty()) {
+			throw new Error('You have not added any examples to the KNN classifier.');
+		}
 		const result = await classifier.predictClass(feature);
 
 		// Get the predicted label
