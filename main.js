@@ -2,7 +2,8 @@ require('dotenv').config();
 const { MongoClient, ObjectId } = require("mongodb");
 const User = require("./user");
 const tf = require('@tensorflow/tfjs');
-require('@tensorflow-models/knn-classifier');
+const { KNNClassifier } = require('@tensorflow-models/knn-classifier');
+
 
 MongoClient.connect(
     // "mongodb+srv://chiam:chiam@cluster0.an2vt5v.mongodb.net/weposeAPI",
@@ -260,7 +261,8 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		console.log("Initialization:")
 
 		// Create a new KNN classifier
-		const classifier = knnClassifier.create();
+		const classifier = new KNNClassifier();
+
 
 		// Collect inlier data for one minute
 		const startTime = Date.now();
