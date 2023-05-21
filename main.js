@@ -292,8 +292,12 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 	try {
 		console.log("Initialization:")
 
-		for (i = 0; i < 50; i++) {
+		for (i = 0; i < 20; i++) {
 			const { pitch, roll } = req.body;
+			console.log("pitch")
+			console.log(pitch)
+			console.log("roll")
+			console.log(roll)
 			trainData.push([pitch, roll]);  
 			await new Promise(resolve => setTimeout(resolve, 5000)); // Sleep for 1 second before collecting the next data point
 
