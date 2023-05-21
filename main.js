@@ -318,6 +318,7 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 
 		// 进行异常检测，判断新数据是否为异常样本
 		const anomalyScore = iforest.scores(newSample);
+		console.log(anomalyScore);
 
 		if (anomalyScore < 0) {
 			console.log('新数据被判断为异常样本');
