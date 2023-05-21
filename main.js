@@ -310,14 +310,23 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		// 创建并训练单类支持向量机模型 // Create a new Isolation Forest instance
 		const iforest = new IsolationForest(options);
 		iforest.fit(trainData);
+		console.log("train data:")
+		console.log(trainData)
+
+		console.log("model")
+		console.log(iforest)
 
 
 		// 假设你有一个新的传感器数据需要进行预测
 		const { pitch, roll } = req.body;
 		const newSample = [pitch, roll];
 
+		console.log("New data")
+		console.log(newSample)
+
 		// 进行异常检测，判断新数据是否为异常样本
 		const anomalyScore = iforest.scores(newSample);
+		console.log("score")
 		console.log(anomalyScore);
 
 		if (anomalyScore < 0) {
