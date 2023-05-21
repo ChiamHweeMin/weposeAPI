@@ -321,7 +321,7 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		// 假设你有一个新的传感器数据需要进行预测
 		const pitch = parseFloat(req.body.pitch);
 		const roll = parseFloat(req.body.roll);
-		const newSample = [pitch, roll];
+		const newSample = [[pitch, roll]];
 
 		console.log("New data: ", newSample)
 
