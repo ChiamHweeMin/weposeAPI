@@ -54,15 +54,39 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
-// 创建并训练Isolation Forest模型
-const options3 = {
-	nEstimators: 100, // 树的数量
-	maxSamples: 'auto', // 从训练数据中选择的样本数量（'auto'表示自动选择）
-	maxFeatures: 1.0, // 每棵树中使用的特征数量的比例
-	contamination: 0.1 // 异常样本的比例
-};
-// 创建并训练单类支持向量机模型 // Create a new Isolation Forest instance
-const iforest = new IsolationForest(options3);
+// Function to communicate with the Python process
+const performOneClassClassification = (data) => {
+	return new Promise((resolve, reject) => {
+	  // Spawn a Python process
+	  const pythonProcess = spawn('python', ['path/to/your/script.py']);
+  
+	  // Send data to the Python process
+	  pythonProcess.stdin.write(JSON.stringify(data));
+	  pythonProcess.stdin.end(); // End the input stream
+  
+	  // Receive data from the Python process
+	  let output = '';
+	  pythonProcess.stdout.on('data', (data) => {
+		output += data.toString();
+	  });
+  
+	  // Handle process termination
+	  pythonProcess.on('close', (code) => {
+		if (code === 0) {
+		  // Resolve with the output from the Python process
+		  resolve(output);
+		} else {
+		  // Reject with an error message
+		  reject(new Error(`Python process exited with code ${code}`));
+		}
+	  });
+  
+	  // Handle process errors
+	  pythonProcess.on('error', (err) => {
+		reject(err);
+	  });
+	});
+  };
 
 /***************************************  USER FUNCTION  ***************************************/
 //         Register, Login, Update (Visitor and Admin), Delete, View Reservation Info              //
@@ -273,16 +297,23 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 			const roll = parseFloat(req.body.roll);
 			console.log("pitch: ", pitch)
 			console.log("roll:", roll )
-			iforest.addTree([pitch, roll]);
-			// trainData.push([pitch, roll]);  
+			trainData.push([pitch, roll]);  
 			await new Promise(resolve => setTimeout(resolve, 5000)); // Sleep for 1 second before collecting the next data point
 
 		}
 
-		iforest.build();
+		// 创建并训练Isolation Forest模型
+		const options = {
+			nEstimators: 100, // 树的数量
+			maxSamples: 20, // 从训练数据中选择的样本数量（'auto'表示自动选择）
+			maxFeatures: 1.0, // 每棵树中使用的特征数量的比例
+			contamination: 0.1 // 异常样本的比例
+		};
 
-
-
+		// 创建并训练单类支持向量机模型 // Create a new Isolation Forest instance
+		const iforest = new IsolationForest(options);
+		iforest.fit(trainData);
+		console.log("train data: ", trainData)
 
 		console.log("model: ", iforest)
 
