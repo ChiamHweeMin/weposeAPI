@@ -21,6 +21,7 @@
     "libsvm-js": "^0.2.1",
     "mongodb": "^5.2.0",
     "svm": "^0.1.1",
+    "svm-js": "^1.0.6",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^4.6.2",
     "utf-8-validate": "^6.0.3",

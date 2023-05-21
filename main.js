@@ -2,10 +2,13 @@ require('dotenv').config();
 const { MongoClient, ObjectId } = require("mongodb");
 const User = require("./user");
 const tf = require('@tensorflow/tfjs');
+const { OneClassSVM } = require('svm-js');
+
 const { KNNClassifier } = require('@tensorflow-models/knn-classifier');
 
 const { IsolationForest } = require('isolation-forest');
 
+const { spawn } = require('child_process');
 
 
 MongoClient.connect(
@@ -27,7 +30,8 @@ const port = process.env.PORT || 3000
 let dataIMU = {};
 // Create a new Isolation Forest instance
 const isolationForest = new IsolationForest();
-let n = 0;
+let i = 0;
+const trainData = [];
 // Create a new KNN classifier
 const classifier = new KNNClassifier();
 
@@ -62,6 +66,39 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
+// Function to communicate with the Python process
+const performOneClassClassification = (data) => {
+	return new Promise((resolve, reject) => {
+	  // Spawn a Python process
+	  const pythonProcess = spawn('python', ['path/to/your/script.py']);
+  
+	  // Send data to the Python process
+	  pythonProcess.stdin.write(JSON.stringify(data));
+	  pythonProcess.stdin.end(); // End the input stream
+  
+	  // Receive data from the Python process
+	  let output = '';
+	  pythonProcess.stdout.on('data', (data) => {
+		output += data.toString();
+	  });
+  
+	  // Handle process termination
+	  pythonProcess.on('close', (code) => {
+		if (code === 0) {
+		  // Resolve with the output from the Python process
+		  resolve(output);
+		} else {
+		  // Reject with an error message
+		  reject(new Error(`Python process exited with code ${code}`));
+		}
+	  });
+  
+	  // Handle process errors
+	  pythonProcess.on('error', (err) => {
+		reject(err);
+	  });
+	});
+  };
 
 /***************************************  USER FUNCTION  ***************************************/
 //         Register, Login, Update (Visitor and Admin), Delete, View Reservation Info              //
@@ -267,35 +304,62 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 	try {
 		console.log("Initialization:")
 
-		while (n < 60) {
-			const { pitch, roll } = req.body; // Get the data from the request body
-			const dataPoint = [pitch, roll]; // Use pitch and roll angles as input features
-			isolationForest.fit(dataPoint);
-			n++; // Increment the counter
-			await new Promise(resolve => setTimeout(resolve, 3000)); // Sleep for 3 seconds before collecting the next data point
-		  }
-
-
-		// Get the new data point from the request body
-		const { pitch, roll } = req.body;
-		const dataPoint = [pitch, roll];
-
-		// Perform prediction
-		const anomalyScore = isolationForest.predict(dataPoint);
-
-		// Set a threshold to classify the data point as proper or not
-		const threshold = 0.5; // Adjust the threshold based on your dataset and desired trade-off between false positives and false negatives
-
-		let predictedLabel;
-		if (anomalyScore < threshold) {
-			redictedLabel = 'proper';
-		} else {
-			predictedLabel = 'not proper';
+		for (i = 0; i < 50; i++) {
+			const { pitch, roll } = req.body;
+			trainData.push([pitch, roll]);
+		  
 		}
 
-		console.log(predictedLabel);
+		// 创建并训练单类支持向量机模型
+		const svm = new OneClassSVM();
+		svm.train(trainData);
 
-		res.status(200).json({ label: predictedLabel });
+		// 假设你有一个新的传感器数据需要进行预测
+		const { pitch, roll } = req.body;
+		const newSample = [pitch, roll];
+
+		// 进行预测，判断新数据是否为正常样本
+		const prediction = svm.predict([newSample]);
+
+		if (prediction === 1) {
+			console.log('新数据被判断为正常样本');
+		} else {
+			console.log('新数据被判断为异常样本');
+		}
+
+
+	// try {
+	// 	console.log("Initialization:")
+
+	// 	while (n < 60) {
+	// 		const { pitch, roll } = req.body; // Get the data from the request body
+	// 		const dataPoint = [pitch, roll]; // Use pitch and roll angles as input features
+	// 		isolationForest.fit(dataPoint);
+	// 		n++; // Increment the counter
+	// 		await new Promise(resolve => setTimeout(resolve, 3000)); // Sleep for 3 seconds before collecting the next data point
+	// 	}
+
+
+	// 	// Get the new data point from the request body
+	// 	const { pitch, roll } = req.body;
+	// 	const dataPoint = [pitch, roll];
+
+	// 	// Perform prediction
+	// 	const anomalyScore = isolationForest.predict(dataPoint);
+
+	// 	// Set a threshold to classify the data point as proper or not
+	// 	const threshold = 0.5; // Adjust the threshold based on your dataset and desired trade-off between false positives and false negatives
+
+	// 	let predictedLabel;
+	// 	if (anomalyScore < threshold) {
+	// 		redictedLabel = 'proper';
+	// 	} else {
+	// 		predictedLabel = 'not proper';
+	// 	}
+
+	// 	console.log(predictedLabel);
+
+		// res.status(200).json({ label: predictedLabel });
 	} catch (error) {
 		console.error('An error occurred:', error);
 		res.status(500).json({ error: 'Internal Server Error' });
