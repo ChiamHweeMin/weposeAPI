@@ -295,6 +295,8 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		for (i = 0; i < 50; i++) {
 			const { pitch, roll } = req.body;
 			trainData.push([pitch, roll]);  
+			await new Promise(resolve => setTimeout(resolve, 5000)); // Sleep for 1 second before collecting the next data point
+
 		}
 
 		// 创建并训练Isolation Forest模型
