@@ -1,15 +1,7 @@
 require('dotenv').config();
 const { MongoClient, ObjectId } = require("mongodb");
 const User = require("./user");
-const tf = require('@tensorflow/tfjs');
-const { OneClassSVM } = require('svm-js');
-
-const { KNNClassifier } = require('@tensorflow-models/knn-classifier');
-
 const { IsolationForest } = require('isolation-forest');
-
-const { spawn } = require('child_process');
-
 
 MongoClient.connect(
     // "mongodb+srv://chiam:chiam@cluster0.an2vt5v.mongodb.net/weposeAPI",
@@ -28,12 +20,8 @@ const app = express()
 const port = process.env.PORT || 3000
 
 let dataIMU = {};
-// Create a new Isolation Forest instance
-const isolationForest = new IsolationForest();
 let i = 0;
 const trainData = [];
-// Create a new KNN classifier
-const classifier = new KNNClassifier();
 
 const swaggerUi = require('swagger-ui-express')
 const swaggerJsdoc = require('swagger-jsdoc')
@@ -306,26 +294,34 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 
 		for (i = 0; i < 50; i++) {
 			const { pitch, roll } = req.body;
-			trainData.push([pitch, roll]);
-		  
+			trainData.push([pitch, roll]);  
 		}
 
-		// 创建并训练单类支持向量机模型
-		const svm = new OneClassSVM();
-		svm.train(trainData);
+		// 创建并训练Isolation Forest模型
+		const options = {
+			nEstimators: 100, // 树的数量
+			maxSamples: 'auto', // 从训练数据中选择的样本数量（'auto'表示自动选择）
+			maxFeatures: 1.0, // 每棵树中使用的特征数量的比例
+			contamination: 0.1 // 异常样本的比例
+		};
+
+		// 创建并训练单类支持向量机模型 // Create a new Isolation Forest instance
+		const iforest = new IsolationForest(options);
+		iforest.fit(trainData);
+
 
 		// 假设你有一个新的传感器数据需要进行预测
 		const { pitch, roll } = req.body;
 		const newSample = [pitch, roll];
 
-		// 进行预测，判断新数据是否为正常样本
-		const prediction = svm.predict([newSample]);
+		// 进行异常检测，判断新数据是否为异常样本
+		const anomalyScore = iforest.score(newData);
 
-		if (prediction === 1) {
-			console.log('新数据被判断为正常样本');
-		} else {
+		if (anomalyScore < 0) {
 			console.log('新数据被判断为异常样本');
-		}
+		  } else {
+			console.log('新数据被判断为正常样本');
+		  }
 
 
 	// try {
