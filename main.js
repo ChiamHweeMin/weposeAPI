@@ -295,10 +295,8 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		for (i = 0; i < 20; i++) {
 			const pitch = parseFloat(req.body.pitch);
 			const roll = parseFloat(req.body.roll);
-			console.log("pitch")
-			console.log(pitch)
-			console.log("roll")
-			console.log(roll)
+			console.log("pitch: ", pitch)
+			console.log("roll:", roll )
 			trainData.push([pitch, roll]);  
 			await new Promise(resolve => setTimeout(resolve, 5000)); // Sleep for 1 second before collecting the next data point
 
@@ -315,11 +313,9 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		// 创建并训练单类支持向量机模型 // Create a new Isolation Forest instance
 		const iforest = new IsolationForest(options);
 		iforest.fit(trainData);
-		console.log("train data:")
-		console.log(trainData)
+		console.log("train data: ", trainData)
 
-		console.log("model")
-		console.log(iforest)
+		console.log("model: ", iforest)
 
 
 		// 假设你有一个新的传感器数据需要进行预测
@@ -327,19 +323,17 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		const roll = parseFloat(req.body.roll);
 		const newSample = [pitch, roll];
 
-		console.log("New data")
-		console.log(newSample)
+		console.log("New data: ", newSample)
 
 		// 进行异常检测，判断新数据是否为异常样本
-		const anomalyScore = iforest.scores(newSample);
-		console.log("score")
-		console.log(anomalyScore);
+		const prediction = iforest.predict(newSample);
+		console.log("Prediction: ", prediction)
 
-		if (anomalyScore < 0) {
-			console.log('新数据被判断为异常样本');
-		  } else {
+		if (prediction === 1) {
 			console.log('新数据被判断为正常样本');
-		  }
+		} else {
+			console.log('新数据被判断为异常样本');
+		}
 
 
 	// try {
