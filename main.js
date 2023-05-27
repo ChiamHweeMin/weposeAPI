@@ -326,7 +326,7 @@ app.get('/WEPOSE/initSitPosture', async (req, res) => {
 
 		console.log("SUCCESS store model into database")
 		
-		return res.status(200);
+		return res.status(200).json({msg: "Success"});
 
 
 
@@ -347,11 +347,22 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		const modelData = await User.getUserInitSitData("test@example.com");
 		// get the new data
 		const newSample = [[pitch, roll]];
-		
-		await new Promise(resolve => setTimeout(resolve, 5000))
+
+		// await new Promise(resolve => setTimeout(resolve, 5000))
 
 		// pass the data to python script for prediction
-		const pythonScript2 = spawn('python3', ['./ModelPrediction.py', JSON.stringify(modelData), JSON.stringify(newSample)]);
+		const pythonScript2 = await new Promise((resolve, reject) => {
+			const process = spawn('python3', ['./ModelPrediction.py', JSON.stringify(modelData), JSON.stringify(newSample)]);
+			// Handle process events
+			process.on('error', reject);
+			process.on('close', code => {
+				if(code == 0) {
+					resolve(process);
+			 	} else {
+					reject(new Error('Python script exited with error'))
+				}
+			})
+		})
 
 		pythonScript2.stdout.on('data', (data) => {
 			// process the output data from python script
@@ -368,7 +379,7 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 			console.error('An error occurred:', data.toString());
 		});
 
-		return res.status(200);
+		return res.status(200).json({msg: "Success"});
 
 		// res.status(200).json({ label: predictedLabel });
 	} catch (error) {
