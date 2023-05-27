@@ -13,13 +13,16 @@ svm_model.fit(data)
 # Serialize the SVM model to a byte string
 serialized_model = pickle.dumps(svm_model)
 
+# 将 serialized_model 转换为可传输的字符串形式
+serialized_model_str = serialized_model.hex()
+
 # Convert the byte string to a JSON-serializable format
 json_serializable_model = {
-    'serialized_model': serialized_model.hex()  # Convert to hexadecimal string
+    'serialized_model': serialized_model_str  # Convert to hexadecimal string
 }
 
 # Convert the JSON-serializable model to a JSON string
-json_model = json.dumps(json_serializable_model, ensure_ascii=False)
+json_model = json.dumps(json_serializable_model)
 
 print(json_model)
 # from sklearn.ensemble import IsolationForest
