@@ -21,8 +21,8 @@ const app = express()
 const port = process.env.PORT || 3000
 
 let data = []; // store the received data
-let pitch = 0;
-let roll = 0;
+let pitch = 0.0;
+let roll = 0.0;
 let i = 0;
 
 const swaggerUi = require('swagger-ui-express')
