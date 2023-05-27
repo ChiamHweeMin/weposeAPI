@@ -552,8 +552,18 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 
 app.get('/test', async (req, res) => {
 	console.log("Testing...");
-	const pythonScript = spawn('python3', ['./script.py']);
-	res.send(pythonScript);
+	const pythonScript = spawn('python3', ['script.py']);
+	let data1;
+	// 处理 Python 脚本的输出
+	pythonScript.stdout.on('data', function(data) {
+		data1 = data.toString();
+	});
+
+	// 监听 Python 脚本的退出事件
+	pythonScript.on('close', (code) => {
+		console.log('Python 脚本退出，退出码:', code);
+		res.send(data1);
+	});
 })
 
 app.listen(port, () => {
