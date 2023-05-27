@@ -353,11 +353,12 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		// pass the data to python script for prediction
 		const pythonScript2 = await new Promise((resolve, reject) => {
 			const process = spawn('python3', ['./ModelPrediction.py', JSON.stringify(modelData), JSON.stringify(newSample)]);
+
 			// Handle process events
 			process.on('error', reject);
 			process.stdout.on('data', (data) => {
 				const predictions = JSON.parse(data)
-				console.log(predictions);
+				// outPrediction += data.toString();
 				if (predictions == 1) {
 					console.log('Classification: Normal');
 				} else {
