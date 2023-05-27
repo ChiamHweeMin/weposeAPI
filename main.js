@@ -348,31 +348,32 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		// get the new data
 		const newSample = [[pitch, roll]];
 
-		// await new Promise(resolve => setTimeout(resolve, 5000))
+		await new Promise(resolve => setTimeout(resolve, 2000))
+		const pythonScript2 = spawn('python3', ['./ModelPrediction.py', JSON.stringify(modelData), JSON.stringify(newSample)]);
 
 		// pass the data to python script for prediction
-		const pythonScript2 = await new Promise((resolve, reject) => {
-			const process = spawn('python3', ['./ModelPrediction.py', JSON.stringify(modelData), JSON.stringify(newSample)]);
+		// const pythonScript2 = await new Promise((resolve, reject) => {
+		// 	const process = spawn('python3', ['./ModelPrediction.py', JSON.stringify(modelData), JSON.stringify(newSample)]);
 
-			// Handle process events
-			process.on('error', reject);
-			process.stdout.on('data', (data) => {
-				const predictions = JSON.parse(data)
-				// outPrediction += data.toString();
-				if (predictions == 1) {
-					console.log('Classification: Normal');
-				} else {
-					console.log('Classification: Abnormal');
-				}
-			});
-			process.on('close', code => {
-				if(code == 0) {
-					resolve(process);
-			 	} else {
-					reject(new Error('Python script exited with error'))
-				}
-			})
-		})
+		// 	// Handle process events
+		// 	process.on('error', reject);
+		// 	process.stdout.on('data', (data) => {
+		// 		const predictions = JSON.parse(data)
+		// 		// outPrediction += data.toString();
+		// 		if (predictions == 1) {
+		// 			console.log('Classification: Normal');
+		// 		} else {
+		// 			console.log('Classification: Abnormal');
+		// 		}
+		// 	});
+		// 	process.on('close', code => {
+		// 		if(code == 0) {
+		// 			resolve(process);
+		// 	 	} else {
+		// 			reject(new Error('Python script exited with error'))
+		// 		}
+		// 	})
+		// })
 		// const prediction = JSON.parse(pythonScript2);
 		// console.log("Prediction value:", prediction);
 		// if (prediction == 1) {
@@ -380,16 +381,16 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		// } else {
 		// 	console.log('Classification: Abnormal');
 		// }
-		// pythonScript2.stdout.on('data', (data) => {
-		// 	// process the output data from python script
-		// 	const predictions = JSON.parse(data);
-		// 	console.log("Prediction value:", predictions);
-		// 	if (predictions == 1) {
-		// 		console.log('Classification: Normal');
-		// 	} else {
-		// 		console.log('Classification: Abnormal');
-		// 	}			
-		// });
+		pythonScript2.stdout.on('data', (data) => {
+			// process the output data from python script
+			const predictions = JSON.parse(data);
+			console.log("Prediction value:", predictions);
+			if (predictions == 1) {
+				console.log('Classification: Normal');
+			} else {
+				console.log('Classification: Abnormal');
+			}			
+		});
 
 		pythonScript2.stderr.on('data', (data) => {
 			console.error('An error occurred:', data.toString());
