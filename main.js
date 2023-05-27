@@ -353,9 +353,7 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 
 		data = []; // after the model successfully stored, delete the data received from sensor for the next user
 
-		if (user.status == false) {
-			console.log("Error store model into database")
-		} 
+
 
 		console.log("SUCCESS store model into database")
 		
