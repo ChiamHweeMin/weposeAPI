@@ -16,7 +16,7 @@ serialized_model = joblib.dumps(isolation_forest)
 # Convert the serialized model to a JSON string
 json_model = json.dumps(serialized_model.decode('latin1'))  # Convert bytes to string
 
-
+print(json_model)
 
 
 # # 准备训练数据
