@@ -355,7 +355,6 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 
 		if (user.status == false) {
 			console.log("Error store model into database")
-			return res.status(404)
 		} 
 
 		console.log("SUCCESS store model into database")
