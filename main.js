@@ -354,6 +354,10 @@ app.get('/WEPOSE/initSitPosture', async (req, res) => {
 
 		data = []; // after the model successfully stored, delete the data received from sensor for the next user
 		i = 0;
+		min_valueP = Infinity; 
+		max_valueP = -Infinity; 
+		min_valueR = Infinity; 
+		max_valueR = -Infinity; 
 
 		console.log("SUCCESS store model into database")
 		
