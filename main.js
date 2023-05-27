@@ -21,6 +21,8 @@ const app = express()
 const port = process.env.PORT || 3000
 
 let data = []; // store the received data
+let pitch = 0;
+let roll = 0;
 let i = 0;
 
 const swaggerUi = require('swagger-ui-express')
@@ -240,67 +242,36 @@ app.delete('/UserProfile/DeleteAccount/:UserEmail', verifyToken, async (req, res
 })
 
 // define POST route to receive data from arduino
-app.post('/WEPOSE/SendDataIMU', async (req, res) => {
-	console.log("Sending IMU data....");
-	dataIMU = req.body; // get the data from the request body
-	// console.log(dataIMU);
+app.post('/WEPOSE/sensorDataIMU', async (req, res) => {
+	console.log("Receiving IMU data from sensor....");
+	pitch = parseFloat(req.body.pitch)
+	roll = parseFloat(req.body.roll)
 	res.status(200).json({msg:"Data received!"});
 });
-  
-// define GET route to retrieve data
-/*
-{
-    "accel_x": 0.49,
-    "accel_y": 0.5,
-    "accel_z": 0.52,
-    "gyro_x": 0.36,
-    "gyro_y": 0.46,
-    "gyro_z": 0.5
-}
-*/
+
 // app.get('/WEPOSE/SendDataIMU', async (req, res) => {
 // 	if (dataIMU != null) {
 // 	  console.log("Receiving IMU data.....");
 // 	//   console.log(dataIMU);
 // 	  return res.status(200).json({
 // 		"success": true,
-// 		"accel_x": dataIMU.accel_x,
-// 		"accel_y": dataIMU.accel_y,
-// 		"accel_z": dataIMU.accel_z,
-// 		"gyro_x": dataIMU.gyro_x,
-// 		"gyro_y": dataIMU.gyro_y,
-// 		"gyro_z": dataIMU.gyro_z
+// 		"pitch": dataIMU.pitch,
+// 		"roll": dataIMU.roll
 // 	  })	
 // 	} else {
 // 	  res.status(404).json({msg: "The data has not been sent."});
 // 	}
 // });
 
-app.get('/WEPOSE/SendDataIMU', async (req, res) => {
-	if (dataIMU != null) {
-	  console.log("Receiving IMU data.....");
-	//   console.log(dataIMU);
-	  return res.status(200).json({
-		"success": true,
-		"pitch": dataIMU.pitch,
-		"roll": dataIMU.roll
-	  })	
-	} else {
-	  res.status(404).json({msg: "The data has not been sent."});
-	}
-});
-
 // Initialization step : Collect correct data for user for further classification
-app.post('/WEPOSE/initSitPosture', async (req, res) => {
+app.get('/WEPOSE/initSitPosture', async (req, res) => {
 	try {
 		console.log("Initialization:")
 
 		for (i = 0; i < 5; i++) {
-			const pitch = parseFloat(req.body.pitch)
-			const roll = parseFloat(req.body.roll)
+			data.push([pitch, roll])
 			console.log("pitch: ", pitch)
 			console.log("roll:", roll )
-			data.push([pitch, roll])
 			await new Promise(resolve => setTimeout(resolve, 5000)); // Sleep for 1 second before collecting the next data point
 		}
 
@@ -312,7 +283,6 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		// allocate data sent from python script to string type
 		pythonScript1.stdout.on('data', (data) => {
 			// process the output data from python script
-			// receivedModelData += data.toString()
 			receivedModelData += data.toString();
 			console.log("received data:", receivedModelData)
 		});
@@ -345,7 +315,6 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		await closePromise; // wait for the promise to complete
 		console.log("check3")
 
-
 		// error handle  
 		pythonScript1.stderr.on('data', (data) => {
 			console.error('An error occurred:', data.toString());
@@ -353,15 +322,29 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 
 		data = []; // after the model successfully stored, delete the data received from sensor for the next user
 
-
-
 		console.log("SUCCESS store model into database")
 		
-		// get the new data
-		const pitchNew = parseFloat(req.body.pitch);
-		const rollNew = parseFloat(req.body.roll);
-		const newSample = [[pitchNew, rollNew]];
+		return res.status(200);
 
+
+
+		// res.status(200).json({ label: predictedLabel });
+	} catch (error) {
+		console.error('An error occurred:', error);
+		res.status(500).json({ error: 'Internal Server Error' });
+	  }
+
+})
+
+// Initialization step : Collect correct data for user for further classification
+app.get('/WEPOSE/predictSitPosture', async (req, res) => {
+	try {
+		console.log("Prediction:")
+
+		// get the new data
+		const newSample = [[pitch, roll]];
+
+		// get the store train model from database
 		const modelData = await User.getUserInitSitData("test@example.com");
 
 		// pass the data to python script for prediction
@@ -384,73 +367,6 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 
 		return res.status(200);
 
-
-
-		// // create and train Isolation Forest model
-		// const options = {
-		// 	nEstimators: 100, // number of tree
-		// 	maxSamples: 20, // choose the samples from training data
-		// 	maxFeatures: 1.0, // number of features in each tree
-		// 	contamination: 0.1 // probability of abnormal sample
-		// };
-
-		// // Create a new Isolation Forest instance
-		// const iforest = new IsolationForest(options);
-		// iforest.fit(trainData);
-		// console.log("train data: ", trainData)
-
-		// console.log("model: ", iforest)
-
-
-		// get the new data
-		// const pitch = parseFloat(req.body.pitch);
-		// const roll = parseFloat(req.body.roll);
-		// const newSample = [[pitch, roll]];
-
-		// console.log("New data: ", newSample)
-
-		// // preidict on the new data
-		// const prediction = iforest.predict(newSample);
-		// console.log("Prediction: ", prediction)
-
-		// if (prediction === 1) {
-		// 	console.log('Normal');
-		// } else {
-		// 	console.log('Abnormal');
-		// }
-
-
-	// try {
-	// 	console.log("Initialization:")
-
-	// 	while (n < 60) {
-	// 		const { pitch, roll } = req.body; // Get the data from the request body
-	// 		const dataPoint = [pitch, roll]; // Use pitch and roll angles as input features
-	// 		isolationForest.fit(dataPoint);
-	// 		n++; // Increment the counter
-	// 		await new Promise(resolve => setTimeout(resolve, 3000)); // Sleep for 3 seconds before collecting the next data point
-	// 	}
-
-
-	// 	// Get the new data point from the request body
-	// 	const { pitch, roll } = req.body;
-	// 	const dataPoint = [pitch, roll];
-
-	// 	// Perform prediction
-	// 	const anomalyScore = isolationForest.predict(dataPoint);
-
-	// 	// Set a threshold to classify the data point as proper or not
-	// 	const threshold = 0.5; // Adjust the threshold based on your dataset and desired trade-off between false positives and false negatives
-
-	// 	let predictedLabel;
-	// 	if (anomalyScore < threshold) {
-	// 		redictedLabel = 'proper';
-	// 	} else {
-	// 		predictedLabel = 'not proper';
-	// 	}
-
-	// 	console.log(predictedLabel);
-
 		// res.status(200).json({ label: predictedLabel });
 	} catch (error) {
 		console.error('An error occurred:', error);
@@ -458,111 +374,6 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 	  }
 
 })
-
-// // Initialization step : Collect correct data for user for further classification
-// app.post('WEPOSE/:UserEmail/initSitPosture', async (req, res) => {
-// 	if (req.user.role == 'user') {
-// 		inlierData = [];  // Clear previous inlier data
-// 		console.log("Initialization:")
-// 		// console.log(req.body);
-// 		// dataIMU = req.body; // get the data from the request body
-// 		// inlierData.push([dataIMU.accel_x, dataIMU.accel_y, dataIMU.accel_z, dataIMU.gyro_x, dataIMU.gyro_y, dataIMU.gyro_z]);
-// 		// Start collecting inlier data for one minute
-// 		// const startTime = Date.now();
-// 		// while (Date.now() - startTime < 50000) {
-// 		// 	const { pitch, roll } = req.body;  // Get the data from the request body
-// 		// 	const dataPoint = { pitch, roll }; // Label the data as "proper" posture
-// 		// 	inlierData.push(dataPoint);
-// 		// 	await new Promise(resolve => setTimeout(resolve, 1000));  // Sleep for 1 second before collecting the next data point
-// 		// }
-
-
-// 		// const features = inlierData.map(data => [data.pitch, data.roll]);
-
-
-// 		// // Normalize the features
-// 		// const scaler = new StandardScaler();
-// 		// const normalizedFeatures = scaler.fitTransform(features);
-
-// 		// // Train the OC-SVM model using normalized features
-// 		// const model = new OneClassSVM({ nu: 0.1 }); // Adjust nu parameter as needed
-// 		// model.fit(normalizedFeatures);
-// 		// console.log(model)
-
-
-// 		// // Serialize the trained model
-// 		// const serializedModel = JSON.stringify(model);
-// 		// console.log(serializedModel)
-
-// 		// // Create a new model instance
-// 		// const modelInstance = new Model({
-// 		// 	name: 'Trained Model',
-// 		// 	serializedModel: serializedModel
-// 		// });
-
-// 		// Create a new KNN classifier
-// 		const classifier = knnClassifier.create();
-
-// 		// Collect inlier data for one minute
-// 		const startTime = Date.now();
-// 		while (Date.now() - startTime < 60000) {
-// 			const { pitch, roll } = req.body; // Get the data from the request body
-// 			const dataPoint = { pitch, roll, label: "straight" }; // Label the data as "proper" posture
-// 			const feature = tf.tensor1d([pitch, roll]);
-// 			classifier.addExample(feature, dataPoint.label);
-// 			await new Promise(resolve => setTimeout(resolve, 1000)); // Sleep for 1 second before collecting the next data point
-// 		}
-
-// 		// Serialize the trained model
-// 		const serializedModel = JSON.stringify(classifier);
-// 		console.log(serializedModel)
-
-// 		// Create a new model instance
-// 		const modelInstance = new Model({
-// 			name: 'Trained Model',
-// 			serializedModel: serializedModel
-// 		});
-
-
-
-// 		// Save the trained model
-// 		// console.log('Model saved:', modelSaveResult);
-// 		const user = await User.updateUserInitSitData(req.params.UserEmail, modelInstance);
-
-// 		res.status(200).json({ msg: "Initialization complete. Model trained." });
-// 		// schemaData = {
-// 		// 	"accel_x": dataIMU.accel_x,
-// 		// 	"accel_y": dataIMU.accel_y,
-// 		// 	"accel_z": dataIMU.accel_z,
-// 		// 	"gyro_x": dataIMU.gyro_x,
-// 		// 	"gyro_y": dataIMU.gyro_y,
-// 		// 	"gyro_z": dataIMU.gyro_z
-// 		// }
-
-// 		// const user = await User.updateUserInitSitData(req.params.UserEmail, schemaData);
-// 		if (user.status == false) {
-// 			return res.status(404).json({
-// 				success: false,
-// 				msg: "Email is not exits!"})
-// 		}
-// 		if (user.status == true ) {
-// 			return res.status(200).json({
-// 				success: true,
-// 				msg: "The account is deleted!"})
-// 		}
-// 	} else {
-// 		return res.status(403).json({
-// 			success: false,
-// 			msg: 'Unauthorized'})
-// 	}
-
-// })
-
-// // Classification step : User can do classification based on the correct sitting data collected before
-// app.post('WEPOSE/:UserEmail/classifySitPosture', async (req, res) => {
-
-
-// })
 
 app.get('/test', async (req, res) => {
 	console.log("Testing...");
