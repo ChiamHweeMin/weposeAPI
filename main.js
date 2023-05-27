@@ -323,13 +323,13 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 			console.error('An error occurred:', data.toString());
 		});
 
-		let model = {};
 		//  process the receivedModelData to JSON type
-		const closePromise = new Promise((resolve) => {
-			pythonScript1.on('close', (code) => {
+		const closePromise = new Promise(async(resolve) => {
+			pythonScript1.on('close', async(code) => {
 				if (code == 0) {
 					try {
 						const model = JSON.parse(receivedModelData)
+						await User.updateUserInitSitData("test@example.com", model);
 						console.log('model:', model)
 						resolve(); // indicate completion of Promise
 					} catch (error) {
@@ -344,7 +344,7 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		console.log("check2")  
 		await closePromise; // wait for the promise to complete
 		console.log("check3")
-		const user = await User.updateUserInitSitData("test@example.com", model);
+
 
 		// error handle  
 		pythonScript1.stderr.on('data', (data) => {
