@@ -353,8 +353,12 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		// pass the data to python script for prediction
 		const pythonScript2 = await new Promise((resolve, reject) => {
 			const process = spawn('python3', ['./ModelPrediction.py', JSON.stringify(modelData), JSON.stringify(newSample)]);
+			let outPrediction = "";
 			// Handle process events
 			process.on('error', reject);
+			process.stdout.on('data', (data) => {
+				outPrediction += data.toString();
+			});
 			process.on('close', code => {
 				if(code == 0) {
 					resolve(process);
@@ -363,17 +367,23 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 				}
 			})
 		})
-
-		pythonScript2.stdout.on('data', (data) => {
-			// process the output data from python script
-			const predictions = JSON.parse(data);
-			console.log("Prediction value:", predictions);
-			if (predictions == 1) {
-				console.log('Classification: Normal');
-			} else {
-				console.log('Classification: Abnormal');
-			}			
-		});
+		const prediction = JSON.parse(pythonScript2);
+		console.log("Prediction value:", prediction);
+		if (prediction == 1) {
+			console.log('Classification: Normal');
+		} else {
+			console.log('Classification: Abnormal');
+		}
+		// pythonScript2.stdout.on('data', (data) => {
+		// 	// process the output data from python script
+		// 	const predictions = JSON.parse(data);
+		// 	console.log("Prediction value:", predictions);
+		// 	if (predictions == 1) {
+		// 		console.log('Classification: Normal');
+		// 	} else {
+		// 		console.log('Classification: Abnormal');
+		// 	}			
+		// });
 
 		pythonScript2.stderr.on('data', (data) => {
 			console.error('An error occurred:', data.toString());
