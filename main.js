@@ -388,7 +388,7 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		const modelData = await User.getUserInitSitData("test@example.com");
 		// get the new data
 		nPitch = (pitch - modelData.min_valueP) / (modelData.max_valueP - modelData.min_valueP) * (1 - (-1)) + (-1);
-		nRoll = (roll - min_valueR) / (max_valueR - min_valueR) * (1 - (-1)) + (-1);
+		nRoll = (roll - modelData.min_valueR) / (modelData.max_valueR - modelData.min_valueR) * (1 - (-1)) + (-1);
 		const newSample = [[nPitch, nRoll]];
 		console.log("Predict data:", newSample)
 		await new Promise(resolve => setTimeout(resolve, 2000))
