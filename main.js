@@ -297,12 +297,19 @@ app.get('/WEPOSE/initSitPosture', async (req, res) => {
 
 		console.log("Min：" + min_valueR);
 		console.log("Max：" + max_valueR);
+		sample = {
+			min_valueP: min_valueP,
+			max_valueP: max_valueP,
+			min_valueR: min_valueR,
+			max_valueR: max_valueR
+		}
+		await User.updateUserMinMaxInitSitData("test@example.com", sample)
 
 		for (j = 0; j < 10; j++) {
 			nPitch = (pitch - min_valueP) / (max_valueP - min_valueP) * (1 - (-1)) + (-1);
 			nRoll = (roll - min_valueR) / (max_valueR - min_valueR) * (1 - (-1)) + (-1);
 			data.push([nPitch, nRoll])
-			
+
 			console.log("pitch: ", nPitch)
 			console.log("roll:", nRoll )		
 			await new Promise(resolve => setTimeout(resolve, 1000)); // Sleep for 1 second before collecting the next data point
@@ -380,12 +387,12 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		// get the store train model from database
 		const modelData = await User.getUserInitSitData("test@example.com");
 		// get the new data
-		nPitch = (pitch - min_valueP) / (max_valueP - min_valueP) * (1 - (-1)) + (-1);
+		nPitch = (pitch - modelData.min_valueP) / (modelData.max_valueP - modelData.min_valueP) * (1 - (-1)) + (-1);
 		nRoll = (roll - min_valueR) / (max_valueR - min_valueR) * (1 - (-1)) + (-1);
 		const newSample = [[nPitch, nRoll]];
 		console.log("Predict data:", newSample)
 		await new Promise(resolve => setTimeout(resolve, 2000))
-		const pythonScript2 = spawn('python3', ['./ModelPrediction.py', JSON.stringify(modelData), JSON.stringify(newSample)]);
+		const pythonScript2 = spawn('python3', ['./ModelPrediction.py', JSON.stringify(modelData.InitSitData), JSON.stringify(newSample)]);
 
 		// pass the data to python script for prediction
 		// const pythonScript2 = await new Promise((resolve, reject) => {

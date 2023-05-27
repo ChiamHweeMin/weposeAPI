@@ -151,14 +151,43 @@ class User {
 		}
 	}
 
+	static async updateUserMinMaxInitSitData(email, sample) {
+		// Check if user exists
+		const isExists = await user.findOne({ UserEmail: email })
+		if (isExists) {
+			// Update the field Init Sit Data
+			console.log("Email match")
+			await user.updateOne({
+            	UserEmail: email
+            }, { 
+				$set: {
+					min_valueP: sample.min_valueP,
+					max_valueP: sample.max_valueP,
+					min_valueR: sample.min_valueR,
+					max_valueR: sample.max_valueR
+				} 
+			}, { upsert: true }).then (result => {
+                console.log(result)
+            }).catch((err) => {
+                    console.log('Error: ' + err);
+            })
+			const data = await user.findOne({ UserEmail: sample.UserEmail })
+			return data
+		}
+		else {
+			console.log("Email not match")
+			return { status: false }
+		}
+	}
+
 	static async getUserInitSitData(email) {
 		// Check if user exists
 		const isExists = await user.findOne({ UserEmail: email })
 		if (isExists) {
 			console.log("Email match")
-			const data = isExists.InitSitData
+			// const data = isExists.InitSitData
 			console.log(data)
-			return data
+			return isExists
 		}
 		else {
 			console.log("Email not match")
