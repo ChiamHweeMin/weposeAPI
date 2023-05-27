@@ -296,11 +296,11 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		console.log("Initialization:")
 
 		for (i = 0; i < 10; i++) {
-			const pitch = parseFloat(req.body.pitch);
-			const roll = parseFloat(req.body.roll);
+			const pitch = parseFloat(req.body.pitch)
+			const roll = parseFloat(req.body.roll)
 			console.log("pitch: ", pitch)
 			console.log("roll:", roll )
-			data.push([pitch, roll]);  
+			data.push([pitch, roll])
 			await new Promise(resolve => setTimeout(resolve, 5000)); // Sleep for 1 second before collecting the next data point
 		}
 
@@ -312,16 +312,17 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		// allocate data sent from python script to string type
 		pythonScript1.stdout.on('data', (data) => {
 			// process the output data from python script
-			receivedModelData += data.toString();;
-			console.log("received data:", receivedModelData);
+			receivedModelData += data.toString()
+			console.log("received data:", receivedModelData)
 		});
+		console.log("check1")
 
 		let model = {};
 		//  process the receivedModelData to JSON type
 		const closePromise = new Promise((resolve) => {
 			pythonScript1.on('close', () => {
-			  model = JSON.parse(receivedModelData);
-			  console.log('model:', model);
+			  model = JSON.parse(receivedModelData)
+			  console.log('model:', model)
 			  resolve(); // indicate completion of Promise
 			});
 		  });
