@@ -11,10 +11,10 @@ isolation_forest = IsolationForest(n_estimators=100, contamination=0.1)
 isolation_forest.fit(data)
 
 # Serialize the isolation forest model to JSON
-serialized_model = pickle.dump(isolation_forest)
+serialized_model = pickle.dumps(isolation_forest)
 
 # Convert the serialized model to a JSON string
-json_model = json.dump(serialized_model.decode('latin1'))  # Convert bytes to string
+json_model = json.dumps(serialized_model.decode('latin1'))  # Convert bytes to string
 
 print(json_model)
 

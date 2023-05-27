@@ -13,4 +13,4 @@ isolation_forest = model_data['InitSitData']
 # Predict the new sample data
 predictions = isolation_forest.predict(new_data)
 predictions_list = predictions.tolist()  # convert ndarray to list 
-print(json.dump(predictions_list))
+print(json.dumps(predictions_list))
