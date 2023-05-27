@@ -20,10 +20,18 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000
 
+let nData = [];
 let data = []; // store the received data
 let pitch = 0.0;
 let roll = 0.0;
 let i = 0;
+let j = 0;
+let min_valueP = Infinity; 
+let max_valueP = -Infinity; 
+let min_valueR = Infinity; 
+let max_valueR = -Infinity; 
+let nPitch = 0.0;
+let nRoll = 0.0;
 
 const swaggerUi = require('swagger-ui-express')
 const swaggerJsdoc = require('swagger-jsdoc')
@@ -269,12 +277,34 @@ app.post('/WEPOSE/sensorDataIMU', async (req, res) => {
 app.get('/WEPOSE/initSitPosture', async (req, res) => {
 	try {
 		console.log("Initialization:")
+		
+		while (i < 20) {
+			if (pitch < min_valueP) {
+				min_valueP = pitch;
+			}
+			if (pitch > max_valueP) {
+				max_valueP = pitch;
+			}
+			if (roll < min_valueR) {
+				min_valueR = roll;
+			}
+			if (roll > max_valueR) {
+				max_valueR = roll;
+			}
+			i++;
+		}
 
-		for (i = 0; i < 5; i++) {
-			data.push([pitch, roll])
-			console.log("pitch: ", pitch)
-			console.log("roll:", roll )
-			await new Promise(resolve => setTimeout(resolve, 5000)); // Sleep for 1 second before collecting the next data point
+		console.log("Min：" + min_valueR);
+		console.log("Max：" + max_valueR);
+
+		for (j = 0; j < 10; j++) {
+			nPitch = (pitch - min_valueP) / (max_valueP - min_valueP) * (1 - (-1)) + (-1);
+			nRoll = (roll - min_valueR) / (max_valueR - min_valueR) * (1 - (-1)) + (-1);
+			data.push([nPitch, nRoll])
+
+			console.log("pitch: ", nPitch)
+			console.log("roll:", nRoll )		
+			await new Promise(resolve => setTimeout(resolve, 1000)); // Sleep for 1 second before collecting the next data point
 		}
 
 		let receivedModelData = "";
@@ -323,12 +353,11 @@ app.get('/WEPOSE/initSitPosture', async (req, res) => {
 		});
 
 		data = []; // after the model successfully stored, delete the data received from sensor for the next user
+		i = 0;
 
 		console.log("SUCCESS store model into database")
 		
 		return res.status(200).json({msg: "Success"});
-
-
 
 		// res.status(200).json({ label: predictedLabel });
 	} catch (error) {
@@ -346,7 +375,9 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		// get the store train model from database
 		const modelData = await User.getUserInitSitData("test@example.com");
 		// get the new data
-		const newSample = [[pitch, roll]];
+		nPitch = (pitch - min_valueP) / (max_valueP - min_valueP) * (1 - (-1)) + (-1);
+		nRoll = (roll - min_valueR) / (max_valueR - min_valueR) * (1 - (-1)) + (-1);
+		const newSample = [[nPitch, nRoll]];
 		console.log("Predict data:", newSample)
 		await new Promise(resolve => setTimeout(resolve, 2000))
 		const pythonScript2 = spawn('python3', ['./ModelPrediction.py', JSON.stringify(modelData), JSON.stringify(newSample)]);
