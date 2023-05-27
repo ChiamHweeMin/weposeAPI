@@ -2,6 +2,7 @@ const { spawn } = require('child_process');
 require('dotenv').config();
 const { MongoClient, ObjectId } = require("mongodb");
 const User = require("./user");
+const { IsolationForest } = require('isolation-forest');
 
 MongoClient.connect(
     // "mongodb+srv://chiam:chiam@cluster0.an2vt5v.mongodb.net/weposeAPI",
@@ -552,7 +553,7 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 
 app.get('/test', async (req, res) => {
 	console.log("Testing...");
-	const pythonScript = spawn('python', ['script.py']);
+	const pythonScript = spawn('python', ['/script.py']);
 	let data1;
 	// 处理 Python 脚本的输出
 	pythonScript.stdout.on('data', function(data) {
@@ -564,6 +565,53 @@ app.get('/test', async (req, res) => {
 		console.log('Python 脚本退出，退出码:', code);
 		res.send(data1);
 	});
+
+		// create and train Isolation Forest model
+		// const options = {
+		// 	nEstimators: 100, // number of tree
+		// 	maxSamples: 20, // choose the samples from training data
+		// 	maxFeatures: 1.0, // number of features in each tree
+		// 	contamination: 0.1 // probability of abnormal sample
+		// };
+
+		// // Create a new Isolation Forest instance
+		// const iforest = new IsolationForest(n_estimators=100, contamination=0.1);
+		// data = [
+		// 	[ -5.46, 7.94 ], [ -5.46, 7.94 ], [ -5.35, 7.88 ], [ -5.46, 7.94 ],
+		// 	[ -5.35, 7.88 ], [ -5.46, 7.94 ], [ -5.38, 7.9 ],  [ -5.35, 7.88 ],
+		// 	[ -5.46, 7.94 ], [ -5.38, 7.9 ],  [ -5.35, 7.88 ], [ -5.36, 7.94 ],
+		// 	[ -5.46, 7.94 ], [ -5.38, 7.9 ],  [ -5.35, 7.88 ], [ -5.36, 7.94 ],
+		// 	[ -5.46, 7.94 ], [ -5.38, 7.9 ],  [ -5.33, 7.89 ], [ -5.35, 7.88 ],
+		// 	[ -5.36, 7.94 ], [ -5.46, 7.94 ], [ -5.38, 7.9 ],  [ -5.33, 7.89 ],
+		// 	[ -5.35, 7.88 ], [ -5.36, 7.94 ], [ -5.29, 7.93 ], [ -5.46, 7.94 ],
+		// 	[ -5.38, 7.9 ],  [ -5.33, 7.89 ], [ -5.35, 7.88 ], [ -5.36, 7.94 ],
+		// 	[ -5.29, 7.93 ], [ -5.46, 7.94 ], [ -5.38, 7.9 ],  [ -5.33, 7.89 ],
+		// 	[ -5.36, 7.91 ], [ -5.35, 7.88 ], [ -5.36, 7.94 ], [ -5.29, 7.93 ] 
+		// ]
+		// iforest.fit(data);
+		// console.log("train data: ", data)
+
+		// console.log("model: ", iforest)
+
+
+		// // get the new data
+		// // const pitch = parseFloat(req.body.pitch);
+		// // const roll = parseFloat(req.body.roll);
+		// // const newSample = [[pitch, roll]];
+		// new_data = [[-5.35, -7.88]]
+
+		// console.log("New data: ", new_data)
+
+		// // preidict on the new data
+		// prediction = iforest.predict(new_data);
+		// console.log("Prediction: ", prediction)
+
+		// if (prediction === 1) {
+		// 	console.log('Normal');
+		// } else {
+		// 	console.log('Abnormal');
+		// }
+		// res.send(prediction)
 })
 
 app.listen(port, () => {
