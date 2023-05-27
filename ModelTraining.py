@@ -14,7 +14,7 @@ isolation_forest.fit(data)
 serialized_model = pickle.dumps(isolation_forest)
 
 # Convert the serialized model to a JSON string
-json_model = json.dumps(serialized_model.decode('latin1'))  # Convert bytes to string
+json_model = json.dumps(serialized_model.decode('ascii'))  # Convert bytes to string
 
 print(json_model)
 
