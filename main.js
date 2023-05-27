@@ -552,7 +552,7 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 
 app.get('/test', async (req, res) => {
 	console.log("Testing...");
-	const pythonScript = spawn('python3', ['script.py']);
+	const pythonScript = spawn('python', ['script.py']);
 	let data1;
 	// 处理 Python 脚本的输出
 	pythonScript.stdout.on('data', function(data) {
