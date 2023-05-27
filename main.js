@@ -347,7 +347,7 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		const modelData = await User.getUserInitSitData("test@example.com");
 		// get the new data
 		const newSample = [[pitch, roll]];
-
+		console.log("Predict data:", newSample)
 		await new Promise(resolve => setTimeout(resolve, 2000))
 		const pythonScript2 = spawn('python3', ['./ModelPrediction.py', JSON.stringify(modelData), JSON.stringify(newSample)]);
 
