@@ -10,11 +10,16 @@ data = json.loads(sys.argv[1])
 isolation_forest = IsolationForest(n_estimators=100, contamination=0.1)
 isolation_forest.fit(data)
 
-# Serialize the isolation forest model to JSON
+# Serialize the isolation forest model to a byte string
 serialized_model = pickle.dumps(isolation_forest)
 
-# Convert the serialized model to a JSON string
-json_model = json.dumps(serialized_model.decode('ascii'))  # Convert bytes to string
+# Convert the byte string to a JSON-serializable format
+json_serializable_model = {
+    'serialized_model': serialized_model.hex()  # Convert to hexadecimal string
+}
+
+# Convert the JSON-serializable model to a JSON string
+json_model = json.dumps(json_serializable_model, ensure_ascii=False)
 
 print(json_model)
 
