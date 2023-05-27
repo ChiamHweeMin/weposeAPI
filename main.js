@@ -304,7 +304,7 @@ app.get('/WEPOSE/initSitPosture', async (req, res) => {
 		// }
 		// await User.updateUserMinMaxInitSitData("test@example.com", sample)
 
-		for (j = 0; j < 10; j++) {
+		for (j = 0; j < 50; j++) {
 			// nPitch = (pitch - min_valueP) / (max_valueP - min_valueP) * (1 - (-1)) + (-1);
 			// nRoll = (roll - min_valueR) / (max_valueR - min_valueR) * (1 - (-1)) + (-1);
 			data.push([pitch, roll])
