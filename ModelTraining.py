@@ -7,7 +7,7 @@ import pickle
 data = json.loads(sys.argv[1])
 
 # create SVM model and perform training
-svm_model = OneClassSVM(kernel='rbf', nu=0.1)
+svm_model = OneClassSVM(kernel='rbf', nu=0.3)
 svm_model.fit(data)
 
 # Serialize the SVM model to a byte string
