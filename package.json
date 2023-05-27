@@ -17,6 +17,7 @@
     "isolation-forest": "^0.0.9",
     "jsonwebtoken": "^9.0.0",
     "mongodb": "^5.2.0",
+    "python": "^0.0.4",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^4.6.2",
     "utf-8-validate": "^6.0.3",
