@@ -308,7 +308,7 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 
 		// pass the data to python script for training  // 'D:\Users\\60111\\Documents\\GitHub\\weposeAPI\\ModelTraining.py
 		const pythonScript1 = spawn('python3', ['./ModelTraining.py', JSON.stringify(data)]);
-		
+		console.log("Success send data to python")
 		// allocate data sent from python script to string type
 		pythonScript1.stdout.on('data', (data) => {
 			// process the output data from python script
