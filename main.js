@@ -357,7 +357,13 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 			// Handle process events
 			process.on('error', reject);
 			process.stdout.on('data', (data) => {
-				outPrediction += data.toString();
+				const predictions = JSON.parse(data)
+				// outPrediction += data.toString();
+				if (predictions == 1) {
+					console.log('Classification: Normal');
+				} else {
+					console.log('Classification: Abnormal');
+				}
 			});
 			process.on('close', code => {
 				if(code == 0) {
@@ -367,13 +373,13 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 				}
 			})
 		})
-		const prediction = JSON.parse(pythonScript2);
-		console.log("Prediction value:", prediction);
-		if (prediction == 1) {
-			console.log('Classification: Normal');
-		} else {
-			console.log('Classification: Abnormal');
-		}
+		// const prediction = JSON.parse(pythonScript2);
+		// console.log("Prediction value:", prediction);
+		// if (prediction == 1) {
+		// 	console.log('Classification: Normal');
+		// } else {
+		// 	console.log('Classification: Abnormal');
+		// }
 		// pythonScript2.stdout.on('data', (data) => {
 		// 	// process the output data from python script
 		// 	const predictions = JSON.parse(data);
