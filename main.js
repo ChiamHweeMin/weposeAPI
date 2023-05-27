@@ -313,7 +313,7 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		pythonScript1.stdout.on('data', (data) => {
 			// process the output data from python script
 			// receivedModelData += data.toString()
-			receivedModelData += data.toString('utf8');
+			receivedModelData += data.toString();
 			console.log("received data:", receivedModelData)
 		});
 		console.log("check1")
