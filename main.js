@@ -1,7 +1,7 @@
+const { spawn } = require('child_process');
 require('dotenv').config();
 const { MongoClient, ObjectId } = require("mongodb");
 const User = require("./user");
-const { IsolationForest } = require('isolation-forest');
 
 MongoClient.connect(
     // "mongodb+srv://chiam:chiam@cluster0.an2vt5v.mongodb.net/weposeAPI",
@@ -19,9 +19,8 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000
 
-let dataIMU = {};
+let data = []; // store the received data
 let i = 0;
-const trainData = [];
 
 const swaggerUi = require('swagger-ui-express')
 const swaggerJsdoc = require('swagger-jsdoc')
@@ -54,44 +53,47 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
-// Function to communicate with the Python process
-const performOneClassClassification = (data) => {
-	return new Promise((resolve, reject) => {
-	  // Spawn a Python process
-	  const pythonProcess = spawn('python', ['path/to/your/script.py']);
+// // Function to communicate with the Python process
+// const performOneClassClassification = (data) => {
+// 	return new Promise((resolve, reject) => {
+// 	  // Spawn a Python process
+// 	  const pythonProcess = spawn('python', ['path/to/your/script.py']);
   
-	  // Send data to the Python process
-	  pythonProcess.stdin.write(JSON.stringify(data));
-	  pythonProcess.stdin.end(); // End the input stream
+// 	  // Send data to the Python process
+// 	  pythonProcess.stdin.write(JSON.stringify(data));
+// 	  pythonProcess.stdin.end(); // End the input stream
   
-	  // Receive data from the Python process
-	  let output = '';
-	  pythonProcess.stdout.on('data', (data) => {
-		output += data.toString();
-	  });
+// 	  // Receive data from the Python process
+// 	  let output = '';
+// 	  pythonProcess.stdout.on('data', (data) => {
+// 		output += data.toString();
+// 	  });
   
-	  // Handle process termination
-	  pythonProcess.on('close', (code) => {
-		if (code === 0) {
-		  // Resolve with the output from the Python process
-		  resolve(output);
-		} else {
-		  // Reject with an error message
-		  reject(new Error(`Python process exited with code ${code}`));
-		}
-	  });
+// 	  // Handle process termination
+// 	  pythonProcess.on('close', (code) => {
+// 		if (code === 0) {
+// 		  // Resolve with the output from the Python process
+// 		  resolve(output);
+// 		} else {
+// 		  // Reject with an error message
+// 		  reject(new Error(`Python process exited with code ${code}`));
+// 		}
+// 	  });
   
-	  // Handle process errors
-	  pythonProcess.on('error', (err) => {
-		reject(err);
-	  });
-	});
-  };
+// 	  // Handle process errors
+// 	  pythonProcess.on('error', (err) => {
+// 		reject(err);
+// 	  });
+// 	});
+//   };
 
 /***************************************  USER FUNCTION  ***************************************/
 //         Register, Login, Update (Visitor and Admin), Delete, View Reservation Info              //
 //                  Register, Login, Manage Admin collections, View Visitor Info                   //
-
+app.get('/', async (req, res) => {
+	console.log("HELLO")
+	return res.status(200).json({msg: "Hello World"})
+})
 app.post('/registerUser', async (req, res) => {
 	console.log("User registeration:")
 	console.log(req.body);
@@ -297,43 +299,111 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 			const roll = parseFloat(req.body.roll);
 			console.log("pitch: ", pitch)
 			console.log("roll:", roll )
-			trainData.push([pitch, roll]);  
+			data.push([pitch, roll]);  
 			await new Promise(resolve => setTimeout(resolve, 5000)); // Sleep for 1 second before collecting the next data point
-
 		}
 
-		// 创建并训练Isolation Forest模型
-		const options = {
-			nEstimators: 100, // 树的数量
-			maxSamples: 20, // 从训练数据中选择的样本数量（'auto'表示自动选择）
-			maxFeatures: 1.0, // 每棵树中使用的特征数量的比例
-			contamination: 0.1 // 异常样本的比例
-		};
+		let receivedModelData = "";
 
-		// 创建并训练单类支持向量机模型 // Create a new Isolation Forest instance
-		const iforest = new IsolationForest(options);
-		iforest.fit(trainData);
-		console.log("train data: ", trainData)
+		// pass the data to python script for training  // 'D:\Users\\60111\\Documents\\GitHub\\weposeAPI\\ModelTraining.py
+		const pythonScript1 = spawn('python', ['ModelTraining.py', JSON.stringify(data)]);
+		
+		// allocate data sent from python script to string type
+		pythonScript1.stdout.on('data', (data) => {
+			// process the output data from python script
+			receivedModelData += data.toString();;
+			console.log("received data:", receivedModelData);
+		});
 
-		console.log("model: ", iforest)
+		let model = {};
+		//  process the receivedModelData to JSON type
+		const closePromise = new Promise((resolve) => {
+			pythonScript1.on('close', () => {
+			  model = JSON.parse(receivedModelData);
+			  console.log('model:', model);
+			  resolve(); // indicate completion of Promise
+			});
+		  });
+		  
+		await closePromise; // wait for the promise to complete
+		
+		const user = await User.updateUserInitSitData("test@example.com", model);
+
+		// error handle  
+		pythonScript1.stderr.on('data', (data) => {
+			console.error('An error occurred:', data.toString());
+		});
+
+		data = []; // after the model successfully stored, delete the data received from sensor for the next user
+
+		if (user.status == false) {
+			console.log("Error store model into database")
+			return res.status(404)
+		} 
+
+		console.log("SUCCESS store model into database")
+		
+		// get the new data
+		const pitchNew = parseFloat(req.body.pitch);
+		const rollNew = parseFloat(req.body.roll);
+		const newSample = [[pitchNew, rollNew]];
+
+		const modelData = await User.getUserInitSitData("test@example.com");
+
+		// pass the data to python script for prediction
+		const pythonScript2 = spawn('python', ['ModelPrediction.py', JSON.stringify(modelData), JSON.stringify(newSample)]);
+
+		pythonScript2.stdout.on('data', (data) => {
+			// process the output data from python script
+			const predictions = JSON.parse(data);
+			console.log("Prediction value:", predictions);
+			if (predictions == 1) {
+				console.log('Classification: Normal');
+			} else {
+				console.log('Classification: Abnormal');
+			}			
+		});
+
+		pythonScript2.stderr.on('data', (data) => {
+			console.error('An error occurred:', data.toString());
+		});
+
+		return res.status(200);
 
 
-		// 假设你有一个新的传感器数据需要进行预测
-		const pitch = parseFloat(req.body.pitch);
-		const roll = parseFloat(req.body.roll);
-		const newSample = [[pitch, roll]];
 
-		console.log("New data: ", newSample)
+		// // create and train Isolation Forest model
+		// const options = {
+		// 	nEstimators: 100, // number of tree
+		// 	maxSamples: 20, // choose the samples from training data
+		// 	maxFeatures: 1.0, // number of features in each tree
+		// 	contamination: 0.1 // probability of abnormal sample
+		// };
 
-		// 进行异常检测，判断新数据是否为异常样本
-		const prediction = iforest.predict(newSample);
-		console.log("Prediction: ", prediction)
+		// // Create a new Isolation Forest instance
+		// const iforest = new IsolationForest(options);
+		// iforest.fit(trainData);
+		// console.log("train data: ", trainData)
 
-		if (prediction === 1) {
-			console.log('新数据被判断为正常样本');
-		} else {
-			console.log('新数据被判断为异常样本');
-		}
+		// console.log("model: ", iforest)
+
+
+		// get the new data
+		// const pitch = parseFloat(req.body.pitch);
+		// const roll = parseFloat(req.body.roll);
+		// const newSample = [[pitch, roll]];
+
+		// console.log("New data: ", newSample)
+
+		// // preidict on the new data
+		// const prediction = iforest.predict(newSample);
+		// console.log("Prediction: ", prediction)
+
+		// if (prediction === 1) {
+		// 	console.log('Normal');
+		// } else {
+		// 	console.log('Abnormal');
+		// }
 
 
 	// try {
