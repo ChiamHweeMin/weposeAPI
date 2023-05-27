@@ -552,7 +552,8 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 
 app.get('/test', async (req, res) => {
 	console.log("Testing...");
-	return res.status(200).send("Hello World");
+	const pythonScript = spawn('python3', ['./script.py']);
+	res.send(pythonScript);
 })
 
 app.listen(port, () => {
