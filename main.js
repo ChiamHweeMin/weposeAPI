@@ -291,6 +291,7 @@ app.get('/WEPOSE/initSitPosture', async (req, res) => {
 			if (roll > max_valueR) {
 				max_valueR = roll;
 			}
+			await new Promise(resolve => setTimeout(resolve, 1000));
 			i++;
 		}
 
@@ -301,7 +302,7 @@ app.get('/WEPOSE/initSitPosture', async (req, res) => {
 			nPitch = (pitch - min_valueP) / (max_valueP - min_valueP) * (1 - (-1)) + (-1);
 			nRoll = (roll - min_valueR) / (max_valueR - min_valueR) * (1 - (-1)) + (-1);
 			data.push([nPitch, nRoll])
-
+			
 			console.log("pitch: ", nPitch)
 			console.log("roll:", nRoll )		
 			await new Promise(resolve => setTimeout(resolve, 1000)); // Sleep for 1 second before collecting the next data point
