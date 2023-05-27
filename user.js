@@ -186,7 +186,7 @@ class User {
 		if (isExists) {
 			console.log("Email match")
 			// const data = isExists.InitSitData
-			console.log(data)
+			// console.log(data)
 			return isExists
 		}
 		else {

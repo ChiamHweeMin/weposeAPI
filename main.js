@@ -20,18 +20,17 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000
 
-let nData = [];
 let data = []; // store the received data
-let pitch = 0.0;
-let roll = 0.0;
 let i = 0;
-let j = 0;
 let min_valueP = Infinity; 
 let max_valueP = -Infinity; 
 let min_valueR = Infinity; 
 let max_valueR = -Infinity; 
 let nPitch = 0.0;
 let nRoll = 0.0;
+let pitch = 0.0;
+let roll = 0.0;
+let j = 0;
 
 const swaggerUi = require('swagger-ui-express')
 const swaggerJsdoc = require('swagger-jsdoc')
@@ -438,6 +437,9 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		pythonScript2.stderr.on('data', (data) => {
 			console.error('An error occurred:', data.toString());
 		});
+
+		nPitch = 0.0;
+		nRoll = 0.0;
 
 		return res.status(200).json({msg: "Success"});
 
