@@ -1,4 +1,4 @@
-from sklearn.ensemble import IsolationForest
+from sklearn.svm import OneClassSVM
 import sys
 import json
 import pickle
@@ -6,12 +6,12 @@ import pickle
 # take the received data from the command
 data = json.loads(sys.argv[1])
 
-# create Isolation Forest model and perform training
-isolation_forest = IsolationForest(n_estimators=100, contamination=0.1)
-isolation_forest.fit(data)
+# create SVM model and perform training
+svm_model = OneClassSVM(kernel='rbf', nu=0.1)
+svm_model.fit(data)
 
-# Serialize the isolation forest model to a byte string
-serialized_model = pickle.dumps(isolation_forest)
+# Serialize the SVM model to a byte string
+serialized_model = pickle.dumps(svm_model)
 
 # Convert the byte string to a JSON-serializable format
 json_serializable_model = {
@@ -22,6 +22,30 @@ json_serializable_model = {
 json_model = json.dumps(json_serializable_model, ensure_ascii=False)
 
 print(json_model)
+# from sklearn.ensemble import IsolationForest
+# import sys
+# import json
+# import pickle
+
+# # take the received data from the command
+# data = json.loads(sys.argv[1])
+
+# # create Isolation Forest model and perform training
+# isolation_forest = IsolationForest(n_estimators=100, contamination=0.1)
+# isolation_forest.fit(data)
+
+# # Serialize the isolation forest model to a byte string
+# serialized_model = pickle.dumps(isolation_forest)
+
+# # Convert the byte string to a JSON-serializable format
+# json_serializable_model = {
+#     'serialized_model': serialized_model.hex()  # Convert to hexadecimal string
+# }
+
+# # Convert the JSON-serializable model to a JSON string
+# json_model = json.dumps(json_serializable_model, ensure_ascii=False)
+
+# print(json_model)
 
 
 # # 准备训练数据
