@@ -341,13 +341,14 @@ app.get('/WEPOSE/initSitPosture', async (req, res) => {
 // Initialization step : Collect correct data for user for further classification
 app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 	try {
-		console.log("Prediction:")
-
-		// get the new data
-		const newSample = [[pitch, roll]];
+		console.log("Prediction Test:")
 
 		// get the store train model from database
 		const modelData = await User.getUserInitSitData("test@example.com");
+		// get the new data
+		const newSample = [[pitch, roll]];
+		
+		await new Promise(resolve => setTimeout(resolve, 5000))
 
 		// pass the data to python script for prediction
 		const pythonScript2 = spawn('python3', ['./ModelPrediction.py', JSON.stringify(modelData), JSON.stringify(newSample)]);
