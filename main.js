@@ -295,7 +295,7 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 	try {
 		console.log("Initialization:")
 
-		for (i = 0; i < 10; i++) {
+		for (i = 0; i < 5; i++) {
 			const pitch = parseFloat(req.body.pitch)
 			const roll = parseFloat(req.body.roll)
 			console.log("pitch: ", pitch)
@@ -312,23 +312,38 @@ app.post('/WEPOSE/initSitPosture', async (req, res) => {
 		// allocate data sent from python script to string type
 		pythonScript1.stdout.on('data', (data) => {
 			// process the output data from python script
-			receivedModelData += data.toString()
+			// receivedModelData += data.toString()
+			receivedModelData += data.toString('utf8');
 			console.log("received data:", receivedModelData)
 		});
 		console.log("check1")
 
+		
+		pythonScript1.stderr.on('data', (data) => {
+			console.error('An error occurred:', data.toString());
+		});
+
 		let model = {};
 		//  process the receivedModelData to JSON type
 		const closePromise = new Promise((resolve) => {
-			pythonScript1.on('close', () => {
-			  model = JSON.parse(receivedModelData)
-			  console.log('model:', model)
-			  resolve(); // indicate completion of Promise
-			});
-		  });
+			pythonScript1.on('close', (code) => {
+				if (code == 0) {
+					try {
+						const model = JSON.parse(receivedModelData)
+						console.log('model:', model)
+						resolve(); // indicate completion of Promise
+					} catch (error) {
+						console.error('Error parsing model:', error);
+					}
+				} else {
+    				console.error('Python script exited with error code:', code);
+  				}
+			})
+		})
 		  
+		console.log("check2")  
 		await closePromise; // wait for the promise to complete
-		
+		console.log("check3")
 		const user = await User.updateUserInitSitData("test@example.com", model);
 
 		// error handle  
