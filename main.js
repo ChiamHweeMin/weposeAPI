@@ -246,6 +246,8 @@ app.post('/WEPOSE/sensorDataIMU', async (req, res) => {
 	console.log("Receiving IMU data from sensor....");
 	pitch = parseFloat(req.body.pitch)
 	roll = parseFloat(req.body.roll)
+	console.log("pitch: ", pitch)
+	console.log("roll:", roll )
 	res.status(200).json({msg:"Data received!"});
 });
 
