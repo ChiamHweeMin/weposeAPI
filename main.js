@@ -297,7 +297,7 @@ app.get('/WEPOSE/initSitPosture', async (req, res) => {
 		for (j = 0; j < 50; j++) {
 			nPitch = (pitch - min_valueP) / (max_valueP - min_valueP) * (1 - (-1)) + (-1);
 			nRoll = (roll - min_valueR) / (max_valueR - min_valueR) * (1 - (-1)) + (-1);
-			data.push([pitch, roll])
+			data.push([nPitch, nRoll])
 			// console.log("pitch: ", pitch)
 			// console.log("roll:", roll )	
 
@@ -398,7 +398,7 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		// get the new data
 		nPitch = (pitch - modelData.min_valueP) / (modelData.max_valueP - modelData.min_valueP) * (1 - (-1)) + (-1);
 		nRoll = (roll - modelData.min_valueR) / (modelData.max_valueR - modelData.min_valueR) * (1 - (-1)) + (-1);
-		const newSample = [[pitch, roll]];
+		const newSample = [[nPitch, nRoll]];
 		console.log("Predict data:", newSample)
 		
 		const threshold = 0.3;
