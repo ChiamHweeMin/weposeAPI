@@ -421,7 +421,7 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		const newSample = [[pitch, roll]];
 		console.log("Predict data:", newSample)
 		
-		const threshold = 1.3;
+		const threshold = 5;
 		
 		// const diff = newSample[0].map((val, index) => Math.abs(val - modelData.meanNormal[index]));
 		// 计算先前和当前数据的差异
