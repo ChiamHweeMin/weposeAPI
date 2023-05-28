@@ -277,32 +277,32 @@ app.get('/WEPOSE/initSitPosture', async (req, res) => {
 	try {
 		console.log("Initialization:")
 		
-		while (i < 50) {
-			if (pitch < min_valueP) {
-				min_valueP = pitch;
-			}
-			if (pitch > max_valueP) {
-				max_valueP = pitch;
-			}
-			if (roll < min_valueR) {
-				min_valueR = roll;
-			}
-			if (roll > max_valueR) {
-				max_valueR = roll;
-			}
-			await new Promise(resolve => setTimeout(resolve, 1000));
-			i++;
-		}
+		// while (i < 20) {
+		// 	if (pitch < min_valueP) {
+		// 		min_valueP = pitch;
+		// 	}
+		// 	if (pitch > max_valueP) {
+		// 		max_valueP = pitch;
+		// 	}
+		// 	if (roll < min_valueR) {
+		// 		min_valueR = roll;
+		// 	}
+		// 	if (roll > max_valueR) {
+		// 		max_valueR = roll;
+		// 	}
+		// 	await new Promise(resolve => setTimeout(resolve, 1000));
+		// 	i++;
+		// }
 
-		for (j = 0; j < 50; j++) {
-			nPitch = (pitch - min_valueP) / (max_valueP - min_valueP) * (1 - (-1)) + (-1);
-			nRoll = (roll - min_valueR) / (max_valueR - min_valueR) * (1 - (-1)) + (-1);
-			data.push([nPitch, nRoll])
-			// console.log("pitch: ", pitch)
-			// console.log("roll:", roll )	
+		for (j = 0; j < 30; j++) {
+			// nPitch = (pitch - min_valueP) / (max_valueP - min_valueP) * (1 - (-1)) + (-1);
+			// nRoll = (roll - min_valueR) / (max_valueR - min_valueR) * (1 - (-1)) + (-1);
+			data.push([pitch, roll])
+			console.log("pitch: ", pitch)
+			console.log("roll:", roll )	
 
-			console.log("pitchN: ", nPitch)
-			console.log("rollN:", nRoll )
+			// console.log("pitchN: ", nPitch)
+			// console.log("rollN:", nRoll )
 	
 			await new Promise(resolve => setTimeout(resolve, 1000)); // Sleep for 1 second before collecting the next data point
 		}
@@ -314,14 +314,20 @@ app.get('/WEPOSE/initSitPosture', async (req, res) => {
 			return acc.map((sum, index) => sum + Math.pow(curr[index] - meanNormal[index], 2));
 		}, new Array(data[0].length).fill(0)).map(sum => Math.sqrt(sum / data.length));	
 
+		
 		sample = {
 			meanNormal: meanNormal,
-			stdNormal: stdNormal,
-			min_valueP: min_valueP,
-			max_valueP: max_valueP,
-			min_valueR: min_valueR,
-			max_valueR: max_valueR
+			stdNormal: stdNormal
 		}
+
+		// sample = {
+		// 	meanNormal: meanNormal,
+		// 	stdNormal: stdNormal,
+		// 	min_valueP: min_valueP,
+		// 	max_valueP: max_valueP,
+		// 	min_valueR: min_valueR,
+		// 	max_valueR: max_valueR
+		// }
 		await User.updateUserMinMaxInitSitData("test@example.com", sample)
 
 		// let receivedModelData = "";
@@ -370,11 +376,11 @@ app.get('/WEPOSE/initSitPosture', async (req, res) => {
 		// });
 
 		data = []; // after the model successfully stored, delete the data received from sensor for the next user
-		i = 0;
-		min_valueP = Infinity; 
-		max_valueP = -Infinity; 
-		min_valueR = Infinity; 
-		max_valueR = -Infinity; 
+		// i = 0;
+		// min_valueP = Infinity; 
+		// max_valueP = -Infinity; 
+		// min_valueR = Infinity; 
+		// max_valueR = -Infinity; 
 
 		console.log("SUCCESS store model into database")
 		
@@ -396,20 +402,42 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		// get the store train model from database
 		const modelData = await User.getUserInitSitData("test@example.com");
 		// get the new data
-		nPitch = (pitch - modelData.min_valueP) / (modelData.max_valueP - modelData.min_valueP) * (1 - (-1)) + (-1);
-		nRoll = (roll - modelData.min_valueR) / (modelData.max_valueR - modelData.min_valueR) * (1 - (-1)) + (-1);
+		// nPitch = (pitch - modelData.min_valueP) / (modelData.max_valueP - modelData.min_valueP) * (1 - (-1)) + (-1);
+		// nRoll = (roll - modelData.min_valueR) / (modelData.max_valueR - modelData.min_valueR) * (1 - (-1)) + (-1);
+		nPrevPitch = (pitch - modelData.meanNormal[0]) / modelData.stdNormal[0]
+		nPrevRoll = (roll - modelData.meanNormal[1]) / modelData.stdNormal[1]
+
+		await new Promise(resolve => setTimeout(resolve, 1000));
+		nPitch = (pitch - modelData.meanNormal[0]) / modelData.stdNormal[0]
+		nRoll = (roll - modelData.meanNormal[1]) / modelData.stdNormal[1]
+
 		const newSample = [[nPitch, nRoll]];
 		console.log("Predict data:", newSample)
 		
 		const threshold = 0.3;
 		
-		const diff = newSample[0].map((val, index) => Math.abs(val - modelData.meanNormal[index]));
-		
-		if (diff.some(val => val > threshold)) {
+		// const diff = newSample[0].map((val, index) => Math.abs(val - modelData.meanNormal[index]));
+		// 计算先前和当前数据的差异
+		const diffPitch = Math.abs(nPitch - nPrevPitch);
+		const diffRoll = Math.abs(nRoll - nPrevRoll);
+
+		console.log("Diff Pitch:", diffPitch);
+		console.log("Diff Roll:", diffRoll);
+
+		// 根据差异进行预测
+		if (diffPitch > threshold || diffRoll > threshold) {
 			console.log("异常数据");
 		} else {
 			console.log("正常数据");
 		}
+
+		// if(n)
+		
+		// if (diff.some(val => val > threshold)) {
+		// 	console.log("异常数据");
+		// } else {
+		// 	console.log("正常数据");
+		// }
 
 
 		// await new Promise(resolve => setTimeout(resolve, 2000))
