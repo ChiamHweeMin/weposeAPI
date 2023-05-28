@@ -425,14 +425,18 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		
 		// const diff = newSample[0].map((val, index) => Math.abs(val - modelData.meanNormal[index]));
 		// 计算先前和当前数据的差异
-		const diffPitch = Math.abs(nPitch - nPrevPitch);
-		const diffRoll = Math.abs(nRoll - nPrevRoll);
+		// const diffPitch = Math.abs(nPitch - nPrevPitch);
+		// const diffRoll = Math.abs(nRoll - nPrevRoll);
 
-		console.log("Diff Pitch:", diffPitch);
-		console.log("Diff Roll:", diffRoll);
+		const diff = newSample[0].map((val, index) => Math.abs(val - prevSample[index]));
+		console.log(diff)
+		// if (diff.some(val => val > threshold)) {
+
+		// console.log("Diff Pitch:", diffPitch);
+		// console.log("Diff Roll:", diffRoll);
 		var result = ""
 		// 根据差异进行预测
-		if (diffPitch > threshold || diffRoll > threshold) {
+		if (diff.some(val => val > threshold))  {
 			result = "Abnormal";
 		} else {
 			result = "Normal";
@@ -495,7 +499,7 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		// 	console.error('An error occurred:', data.toString());
 		// });
 
-		return res.status(200).json({msg: "Success", cValue: newSample, pValue: prevSample, result: result});
+		return res.status(200).json({msg: "Success", cValue: newSample, pValue: prevSample, dff: diff, result: result});
 
 		// res.status(200).json({ label: predictedLabel });
 	} catch (error) {
