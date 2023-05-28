@@ -411,24 +411,24 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		// get the new data
 		// nPitch = (pitch - modelData.min_valueP) / (modelData.max_valueP - modelData.min_valueP) * (1 - (-1)) + (-1);
 		// nRoll = (roll - modelData.min_valueR) / (modelData.max_valueR - modelData.min_valueR) * (1 - (-1)) + (-1);
-		const nPrevPitch = (pitch - modelData.meanNormal[0]) / (modelData.stdNormal[0] / Math.sqrt(30))
-		const nPrevRoll = (roll - modelData.meanNormal[1]) / (modelData.stdNormal[1] / Math.sqrt(30))
-		const prevSample = [nPrevPitch, nPrevRoll]
-		await new Promise(resolve => setTimeout(resolve, 5000));
-		const nPitch = (pitch - modelData.meanNormal[0]) / (modelData.stdNormal[0]/ Math.sqrt(30))
-		const nRoll = (roll - modelData.meanNormal[1]) / (modelData.stdNormal[1] / Math.sqrt(30))
+		// const nPrevPitch = (pitch - modelData.meanNormal[0]) / (modelData.stdNormal[0] / Math.sqrt(30))
+		// const nPrevRoll = (roll - modelData.meanNormal[1]) / (modelData.stdNormal[1] / Math.sqrt(30))
+		// const prevSample = [nPrevPitch, nPrevRoll]
+		// await new Promise(resolve => setTimeout(resolve, 5000));
+		// const nPitch = (pitch - modelData.meanNormal[0]) / (modelData.stdNormal[0]/ Math.sqrt(30))
+		// const nRoll = (roll - modelData.meanNormal[1]) / (modelData.stdNormal[1] / Math.sqrt(30))
 
-		const newSample = [[nPitch, nRoll]];
+		const newSample = [[pitch, roll]];
 		console.log("Predict data:", newSample)
 		
-		const threshold = 0.3;
+		const threshold = 1.3;
 		
 		// const diff = newSample[0].map((val, index) => Math.abs(val - modelData.meanNormal[index]));
 		// 计算先前和当前数据的差异
 		// const diffPitch = Math.abs(nPitch - nPrevPitch);
 		// const diffRoll = Math.abs(nRoll - nPrevRoll);
 
-		const diff = newSample[0].map((val, index) => Math.abs(val - prevSample[index]));
+		const diff = newSample[0].map((val, index) => Math.abs(val - modelData.meanNormal[index]));
 		console.log(diff)
 		// if (diff.some(val => val > threshold)) {
 
