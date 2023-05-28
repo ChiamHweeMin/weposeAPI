@@ -223,20 +223,20 @@ app.delete('/UserProfile/DeleteAccount/:UserEmail', verifyToken, async (req, res
 })
 
 // define POST route to receive data from arduino
-// app.post('/WEPOSE/sensorDataIMU', async (req, res) => {
-// 	let isDataReceived = false;
-// 	if (!isDataReceived) {
-// 		console.log("Receiving IMU data from sensor....");
-// 		const curPitch = parseFloat(req.body.pitch)
-// 		const curRoll = parseFloat(req.body.roll)
-// 		updateSensorData(curPitch, curRoll)
-// 		console.log("pitch: ", curPitch)
-// 		console.log("roll:", curRoll )
-// 		isDataReceived = true
-// 	}
+app.post('/WEPOSE/sensorDataIMU', async (req, res) => {
+	let isDataReceived = false;
+	if (!isDataReceived) {
+		console.log("Receiving IMU data from sensor....");
+		const curPitch = parseFloat(req.body.pitch)
+		const curRoll = parseFloat(req.body.roll)
+		updateSensorData(curPitch, curRoll)
+		console.log("pitch: ", curPitch)
+		console.log("roll:", curRoll )
+		isDataReceived = true
+	}
 	
-// 	res.status(200).json({msg:"Data received!"});
-// });
+	res.status(200).json({msg:"Data received!"});
+});
 
 // Initialization step : Collect correct data for user for further classification
 app.get('/WEPOSE/initSitPosture', async (req, res) => {
