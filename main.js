@@ -418,8 +418,8 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		
 		// const diff = newSample[0].map((val, index) => Math.abs(val - modelData.meanNormal[index]));
 		// 计算先前和当前数据的差异
-		const diffPitch = Math.abs(nPitch - nPrevPitch);
-		const diffRoll = Math.abs(nRoll - nPrevRoll);
+		const diffPitch = nPitch - nPrevPitch;
+		const diffRoll = nRoll - nPrevRoll;
 
 		console.log("Diff Pitch:", diffPitch);
 		console.log("Diff Roll:", diffRoll);
