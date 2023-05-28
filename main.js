@@ -27,8 +27,8 @@ let min_valueP = Infinity;
 let max_valueP = -Infinity; 
 let min_valueR = Infinity; 
 let max_valueR = -Infinity; 
-let nPitch = 0.0;
-let nRoll = 0.0;
+// let nPitch = 0.0;
+// let nRoll = 0.0;
 let pitch = 0.0;
 let roll = 0.0;
 let j = 0;
@@ -101,7 +101,7 @@ app.use(express.urlencoded({ extended: false }))
 function updateSensorData(newPitch, newRoll) {
 	pitch = newPitch;
 	roll = newRoll;
-  }
+}
 
 /***************************************  USER FUNCTION  ***************************************/
 //         Register, Login, Update (Visitor and Admin), Delete, View Reservation Info              //
@@ -411,12 +411,12 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		// get the new data
 		// nPitch = (pitch - modelData.min_valueP) / (modelData.max_valueP - modelData.min_valueP) * (1 - (-1)) + (-1);
 		// nRoll = (roll - modelData.min_valueR) / (modelData.max_valueR - modelData.min_valueR) * (1 - (-1)) + (-1);
-		nPrevPitch = (pitch - modelData.meanNormal[0]) / (modelData.stdNormal[0] / Math.sqrt(30))
-		nPrevRoll = (roll - modelData.meanNormal[1]) / (modelData.stdNormal[1] / Math.sqrt(30))
+		const nPrevPitch = (pitch - modelData.meanNormal[0]) / (modelData.stdNormal[0] / Math.sqrt(30))
+		const nPrevRoll = (roll - modelData.meanNormal[1]) / (modelData.stdNormal[1] / Math.sqrt(30))
 		const prevSample = [[nPrevPitch, nPrevRoll]]
 		await new Promise(resolve => setTimeout(resolve, 5000));
-		nPitch = (pitch - modelData.meanNormal[0]) / (modelData.stdNormal[0]/ Math.sqrt(30))
-		nRoll = (roll - modelData.meanNormal[1]) / (modelData.stdNormal[1] / Math.sqrt(30))
+		const nPitch = (pitch - modelData.meanNormal[0]) / (modelData.stdNormal[0]/ Math.sqrt(30))
+		const nRoll = (roll - modelData.meanNormal[1]) / (modelData.stdNormal[1] / Math.sqrt(30))
 
 		const newSample = [[nPitch, nRoll]];
 		console.log("Predict data:", newSample)
@@ -494,9 +494,6 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		// pythonScript2.stderr.on('data', (data) => {
 		// 	console.error('An error occurred:', data.toString());
 		// });
-
-		nPitch = 0.0;
-		nRoll = 0.0;
 
 		return res.status(200).json({msg: "Success", cValue: newSample, pValue: prevSample, result: result});
 
