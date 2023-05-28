@@ -1,12 +1,8 @@
-// const { spawn } = require('child_process');
 require('dotenv').config();
 const { MongoClient, ObjectId } = require("mongodb");
 const User = require("./user");
-const { IsolationForest } = require('isolation-forest');
-// const axios = require('axios');
 
 MongoClient.connect(
-    // "mongodb+srv://chiam:chiam@cluster0.an2vt5v.mongodb.net/weposeAPI",
 	process.env.MONGO_URI,
 	{ useNewUrlParser: true },
 ).catch(err => {
@@ -22,13 +18,6 @@ const app = express()
 const port = process.env.PORT || 3000
 
 let data = []; // store the received data
-let i = 0;
-let min_valueP = Infinity; 
-let max_valueP = -Infinity; 
-let min_valueR = Infinity; 
-let max_valueR = -Infinity; 
-// let nPitch = 0.0;
-// let nRoll = 0.0;
 let pitch = 0.0;
 let roll = 0.0;
 let j = 0;
@@ -64,52 +53,17 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
-// // Function to communicate with the Python process
-// const performOneClassClassification = (data) => {
-// 	return new Promise((resolve, reject) => {
-// 	  // Spawn a Python process
-// 	  const pythonProcess = spawn('python', ['path/to/your/script.py']);
-  
-// 	  // Send data to the Python process
-// 	  pythonProcess.stdin.write(JSON.stringify(data));
-// 	  pythonProcess.stdin.end(); // End the input stream
-  
-// 	  // Receive data from the Python process
-// 	  let output = '';
-// 	  pythonProcess.stdout.on('data', (data) => {
-// 		output += data.toString();
-// 	  });
-  
-// 	  // Handle process termination
-// 	  pythonProcess.on('close', (code) => {
-// 		if (code === 0) {
-// 		  // Resolve with the output from the Python process
-// 		  resolve(output);
-// 		} else {
-// 		  // Reject with an error message
-// 		  reject(new Error(`Python process exited with code ${code}`));
-// 		}
-// 	  });
-  
-// 	  // Handle process errors
-// 	  pythonProcess.on('error', (err) => {
-// 		reject(err);
-// 	  });
-// 	});
-//   };
-
 function updateSensorData(newPitch, newRoll) {
 	pitch = newPitch;
 	roll = newRoll;
 }
 
 /***************************************  USER FUNCTION  ***************************************/
-//         Register, Login, Update (Visitor and Admin), Delete, View Reservation Info              //
-//                  Register, Login, Manage Admin collections, View Visitor Info                   //
 app.get('/', async (req, res) => {
 	console.log("HELLO")
 	return res.status(200).json({msg: "Hello World"})
 })
+
 app.post('/registerUser', async (req, res) => {
 	console.log("User registeration:")
 	console.log(req.body);
@@ -270,51 +224,16 @@ app.post('/WEPOSE/sensorDataIMU', async (req, res) => {
 	res.status(200).json({msg:"Data received!"});
 });
 
-// app.get('/WEPOSE/SendDataIMU', async (req, res) => {
-// 	if (dataIMU != null) {
-// 	  console.log("Receiving IMU data.....");
-// 	//   console.log(dataIMU);
-// 	  return res.status(200).json({
-// 		"success": true,
-// 		"pitch": dataIMU.pitch,
-// 		"roll": dataIMU.roll
-// 	  })	
-// 	} else {
-// 	  res.status(404).json({msg: "The data has not been sent."});
-// 	}
-// });
-
 // Initialization step : Collect correct data for user for further classification
 app.get('/WEPOSE/initSitPosture', async (req, res) => {
 	try {
 		console.log("Initialization:")
-		
-		// while (i < 20) {
-		// 	if (pitch < min_valueP) {
-		// 		min_valueP = pitch;
-		// 	}
-		// 	if (pitch > max_valueP) {
-		// 		max_valueP = pitch;
-		// 	}
-		// 	if (roll < min_valueR) {
-		// 		min_valueR = roll;
-		// 	}
-		// 	if (roll > max_valueR) {
-		// 		max_valueR = roll;
-		// 	}
-		// 	await new Promise(resolve => setTimeout(resolve, 1000));
-		// 	i++;
-		// }
 
+		// loop for take 30 datasets
 		for (j = 0; j < 30; j++) {
-			// nPitch = (pitch - min_valueP) / (max_valueP - min_valueP) * (1 - (-1)) + (-1);
-			// nRoll = (roll - min_valueR) / (max_valueR - min_valueR) * (1 - (-1)) + (-1);
 			data.push([pitch, roll])
 			console.log("pitch: ", pitch)
 			console.log("roll:", roll )	
-
-			// console.log("pitchN: ", nPitch)
-			// console.log("rollN:", nRoll )
 	
 			await new Promise(resolve => setTimeout(resolve, 1000)); // Sleep for 1 second before collecting the next data point
 		}
@@ -332,73 +251,13 @@ app.get('/WEPOSE/initSitPosture', async (req, res) => {
 			stdNormal: stdNormal
 		}
 
-		// sample = {
-		// 	meanNormal: meanNormal,
-		// 	stdNormal: stdNormal,
-		// 	min_valueP: min_valueP,
-		// 	max_valueP: max_valueP,
-		// 	min_valueR: min_valueR,
-		// 	max_valueR: max_valueR
-		// }
 		await User.updateUserMinMaxInitSitData("test@example.com", sample)
 
-		// let receivedModelData = "";
-
-		// // pass the data to python script for training  // 'D:\Users\\60111\\Documents\\GitHub\\weposeAPI\\ModelTraining.py
-		// const pythonScript1 = spawn('python3', ['./ModelTraining.py', JSON.stringify(data)]);
-		// console.log("Success send data to python")
-		// // allocate data sent from python script to string type
-		// pythonScript1.stdout.on('data', (data) => {
-		// 	// process the output data from python script
-		// 	receivedModelData += data.toString();
-		// 	console.log("received data:", receivedModelData)
-		// });
-		// console.log("check1")
-
-		
-		// pythonScript1.stderr.on('data', (data) => {
-		// 	console.error('An error occurred:', data.toString());
-		// });
-
-		// //  process the receivedModelData to JSON type
-		// const closePromise = new Promise(async(resolve) => {
-		// 	pythonScript1.on('close', async(code) => {
-		// 		if (code == 0) {
-		// 			try {
-		// 				const model = JSON.parse(receivedModelData)
-		// 				await User.updateUserInitSitData("test@example.com", model);
-		// 				console.log('model:', model)
-		// 				resolve(); // indicate completion of Promise
-		// 			} catch (error) {
-		// 				console.error('Error parsing model:', error);
-		// 			}
-		// 		} else {
-    	// 			console.error('Python script exited with error code:', code);
-  		// 		}
-		// 	})
-		// })
-		  
-		// console.log("check2")  
-		// await closePromise; // wait for the promise to complete
-		// console.log("check3")
-
-		// // error handle  
-		// pythonScript1.stderr.on('data', (data) => {
-		// 	console.error('An error occurred:', data.toString());
-		// });
-
 		data = []; // after the model successfully stored, delete the data received from sensor for the next user
-		// i = 0;
-		// min_valueP = Infinity; 
-		// max_valueP = -Infinity; 
-		// min_valueR = Infinity; 
-		// max_valueR = -Infinity; 
 
 		console.log("SUCCESS store model into database")
 		
 		return res.status(200).json({msg: "Success"});
-
-		// res.status(200).json({ label: predictedLabel });
 	} catch (error) {
 		console.error('An error occurred:', error);
 		res.status(500).json({ error: 'Internal Server Error' });
@@ -411,102 +270,38 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 	try {
 		console.log("Prediction Test:")
 
-		// get the store train model from database
+		// get the store data from database for prediction
 		const modelData = await User.getUserInitSitData("test@example.com");
-		// get the new data
-		// nPitch = (pitch - modelData.min_valueP) / (modelData.max_valueP - modelData.min_valueP) * (1 - (-1)) + (-1);
-		// nRoll = (roll - modelData.min_valueR) / (modelData.max_valueR - modelData.min_valueR) * (1 - (-1)) + (-1);
-		// const nPrevPitch = (pitch - modelData.meanNormal[0]) / (modelData.stdNormal[0] / Math.sqrt(30))
-		// const nPrevRoll = (roll - modelData.meanNormal[1]) / (modelData.stdNormal[1] / Math.sqrt(30))
-		// const prevSample = [nPrevPitch, nPrevRoll]
-		// await new Promise(resolve => setTimeout(resolve, 5000));
-		// const nPitch = (pitch - modelData.meanNormal[0]) / (modelData.stdNormal[0]/ Math.sqrt(30))
-		// const nRoll = (roll - modelData.meanNormal[1]) / (modelData.stdNormal[1] / Math.sqrt(30))
 
+		// get the current pitch and roll angle
 		const newSample = [[pitch, roll]];
 		console.log("Predict data:", newSample)
 		
 		const threshold = 10;
-		
-		// const diff = newSample[0].map((val, index) => Math.abs(val - modelData.meanNormal[index]));
-		// 计算先前和当前数据的差异
-		// const diffPitch = Math.abs(nPitch - nPrevPitch);
-		// const diffRoll = Math.abs(nRoll - nPrevRoll);
 
 		const diff = newSample[0].map((val, index) => Math.abs(val - modelData.meanNormal[index]));
 		console.log(diff)
-		// if (diff.some(val => val > threshold)) {
 
-		// console.log("Diff Pitch:", diffPitch);
-		// console.log("Diff Roll:", diffRoll);
-		var result = ""
-		// 根据差异进行预测
+		var classify = ""
+		let result = -1
+		
+		// Perform prediction based on difference with the mean value
 		if (diff.some(val => val > threshold))  {
-			result = "Abnormal";
+			classify = "Abnormal"
+			result = 0
 		} else {
-			result = "Normal";
+			classify = "Normal"
+			result = 1
 		}
 
-		// if(n)
-		
-		// if (diff.some(val => val > threshold)) {
-		// 	console.log("异常数据");
-		// } else {
-		// 	console.log("正常数据");
-		// }
-
-
-		// await new Promise(resolve => setTimeout(resolve, 2000))
-		// const pythonScript2 = spawn('python3', ['./ModelPrediction.py', JSON.stringify(modelData.InitSitData), JSON.stringify(newSample)]);
-
-		// pass the data to python script for prediction
-		// const pythonScript2 = await new Promise((resolve, reject) => {
-		// 	const process = spawn('python3', ['./ModelPrediction.py', JSON.stringify(modelData), JSON.stringify(newSample)]);
-
-		// 	// Handle process events
-		// 	process.on('error', reject);
-		// 	process.stdout.on('data', (data) => {
-		// 		const predictions = JSON.parse(data)
-		// 		// outPrediction += data.toString();
-		// 		if (predictions == 1) {
-		// 			console.log('Classification: Normal');
-		// 		} else {
-		// 			console.log('Classification: Abnormal');
-		// 		}
-		// 	});
-		// 	process.on('close', code => {
-		// 		if(code == 0) {
-		// 			resolve(process);
-		// 	 	} else {
-		// 			reject(new Error('Python script exited with error'))
-		// 		}
-		// 	})
-		// })
-		// const prediction = JSON.parse(pythonScript2);
-		// console.log("Prediction value:", prediction);
-		// if (prediction == 1) {
-		// 	console.log('Classification: Normal');
-		// } else {
-		// 	console.log('Classification: Abnormal');
-		// }
-		// pythonScript2.stdout.on('data', (data) => {
-		// 	// process the output data from python script
-		// 	const predictions = JSON.parse(data);
-		// 	console.log("Prediction value:", predictions);
-		// 	if (predictions == 1) {
-		// 		console.log('Classification: Normal');
-		// 	} else {
-		// 		console.log('Classification: Abnormal');
-		// 	}			
-		// });
-
-		// pythonScript2.stderr.on('data', (data) => {
-		// 	console.error('An error occurred:', data.toString());
-		// });
-
-		return res.status(200).json({msg: "Success", cValue: newSample, dff: diff, result: result});
-
-		// res.status(200).json({ label: predictedLabel });
+		return res.status(200).json({
+			msg: "Success", 
+			cValue: newSample, 
+			dff: diff,
+			pitch: newSample[0][0], 
+			roll: newSample[0][1],
+			prediction: result
+		});
 	} catch (error) {
 		console.error('An error occurred:', error);
 		res.status(500).json({ error: 'Internal Server Error' });
@@ -514,11 +309,13 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 
 })
 
+// /test require <apt-get update && apt-get install -y python3 python3-pip && pip3 install scikit-learn> put in the build command of railway
+// const { spawn } = require('child_process');
 app.get('/test', async (req, res) => {
 	console.log("Testing...");
 	const pythonScript = spawn('python3', ['./script.py']);
 	let data1;
-	// 处理 Python 脚本的输出
+	// process output from python script
 	pythonScript.stdout.on('data', function(data) {
 		data1 = data.toString();
 	});
