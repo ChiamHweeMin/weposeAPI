@@ -3,7 +3,7 @@ require('dotenv').config();
 const { MongoClient, ObjectId } = require("mongodb");
 const User = require("./user");
 const { IsolationForest } = require('isolation-forest');
-const axios = require('axios');
+// const axios = require('axios');
 
 MongoClient.connect(
     // "mongodb+srv://chiam:chiam@cluster0.an2vt5v.mongodb.net/weposeAPI",
