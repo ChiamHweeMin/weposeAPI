@@ -60,17 +60,17 @@ function updateSensorData(newPitch, newRoll) {
 	roll = newRoll;
 }
 
-async function getSensorData() {
-    try {
-        const response = await axios.post(sensorDataUrl);
-        console.log(response.data);
-		const curPitch = parseFloat(response.data.pitch)
-		const curRoll = parseFloat(response.data.roll)
-		updateSensorData(curPitch, curRoll)
-    } catch (error) {
-        console.log(error);
-    }
-}
+// async function getSensorData() {
+//     try {
+//         const response = await axios.post(sensorDataUrl);
+//         console.log(response.data);
+// 		const curPitch = parseFloat(response.data.pitch)
+// 		const curRoll = parseFloat(response.data.roll)
+// 		updateSensorData(curPitch, curRoll)
+//     } catch (error) {
+//         console.log(error);
+//     }
+// }
 
 /***************************************  USER FUNCTION  ***************************************/
 app.get('/', async (req, res) => {
@@ -245,7 +245,7 @@ app.get('/WEPOSE/initSitPosture', async (req, res) => {
 
 		// loop for take 30 datasets
 		for (j = 0; j < 30; j++) {
-			getSensorData();
+			await axios.post('/WEPOSE/sensorDataIMU');
 			data.push([pitch, roll])
 			console.log("pitch: ", pitch)
 			console.log("roll:", roll )	
@@ -287,7 +287,7 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 
 		// get the store data from database for prediction
 		const modelData = await User.getUserInitSitData("test@example.com");
-		getSensorData();
+		await axios.post('/WEPOSE/sensorDataIMU');
 		// get the current pitch and roll angle
 		const newSample = [[pitch, roll]];
 		console.log("Predict data:", newSample)
