@@ -428,7 +428,7 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		// const diffPitch = Math.abs(nPitch - nPrevPitch);
 		// const diffRoll = Math.abs(nRoll - nPrevRoll);
 
-		const diff = newSample[0].map((val, index) => Math.abs(val - prevSample[index]));
+		const diff = newSample[0].map((val, index) => Math.abs(val - prevSample[0]));
 		console.log(diff)
 		// if (diff.some(val => val > threshold)) {
 
