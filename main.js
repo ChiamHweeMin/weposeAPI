@@ -256,12 +256,18 @@ app.delete('/UserProfile/DeleteAccount/:UserEmail', verifyToken, async (req, res
 
 // define POST route to receive data from arduino
 app.post('/WEPOSE/sensorDataIMU', async (req, res) => {
-	console.log("Receiving IMU data from sensor....");
-	const curPitch = parseFloat(req.body.pitch)
-	const curRoll = parseFloat(req.body.roll)
-	console.log("pitch: ", curPitch)
-	console.log("roll:", curRoll )
-	updateSensorData(curPitch, curRoll)
+	let isDataReceived = false;
+	if (!isDataReceived) {
+		console.log("Receiving IMU data from sensor....");
+		const curPitch = parseFloat(req.body.pitch)
+		const curRoll = parseFloat(req.body.roll)
+		console.log("pitch: ", curPitch)
+		console.log("roll:", curRoll )
+		updateSensorData(curPitch, curRoll)
+		isDataReceived = true
+
+	}
+	
 	res.status(200).json({msg:"Data received!"});
 });
 
@@ -421,7 +427,7 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		const newSample = [[pitch, roll]];
 		console.log("Predict data:", newSample)
 		
-		const threshold = 5;
+		const threshold = 10;
 		
 		// const diff = newSample[0].map((val, index) => Math.abs(val - modelData.meanNormal[index]));
 		// 计算先前和当前数据的差异
