@@ -295,7 +295,7 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		}
 
 		return res.status(200).json({
-			msg: "Success", 
+			success: true, 
 			cValue: newSample, 
 			dff: diff,
 			pitch: newSample[0][0], 
