@@ -407,7 +407,7 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		nPrevPitch = (pitch - modelData.meanNormal[0]) / (modelData.stdNormal[0] / Math.sqrt(30))
 		nPrevRoll = (roll - modelData.meanNormal[1]) / (modelData.stdNormal[1] / Math.sqrt(30))
 		const prevSample = [[nPrevPitch, nPrevRoll]]
-		await new Promise(resolve => setTimeout(resolve, 1000));
+		await new Promise(resolve => setTimeout(resolve, 5000));
 		nPitch = (pitch - modelData.meanNormal[0]) / (modelData.stdNormal[0]/ Math.sqrt(30))
 		nRoll = (roll - modelData.meanNormal[1]) / (modelData.stdNormal[1] / Math.sqrt(30))
 
