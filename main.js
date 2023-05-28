@@ -61,7 +61,7 @@ function updateSensorData(newPitch, newRoll) {
 
 async function getSensorData() {
     try {
-        const response = await axios.post('/WEPOSE/sensorDataIMU');
+        const response = await axios.post('https://web-production-23955.up.railway.app/WEPOSE/sensorDataIMU');
         console.log(response.data);
 		const curPitch = parseFloat(response.data.pitch)
 		const curRoll = parseFloat(response.data.roll)
