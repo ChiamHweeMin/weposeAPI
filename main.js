@@ -17,6 +17,7 @@ MongoClient.connect(
 const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000
+const sensorDataUrl = process.env.SENSOR_DATA_URL;
 
 let data = []; // store the received data
 let pitch = 0.0;
@@ -61,7 +62,7 @@ function updateSensorData(newPitch, newRoll) {
 
 async function getSensorData() {
     try {
-        const response = await axios.post('https://web-production-23955.up.railway.app/WEPOSE/sensorDataIMU');
+        const response = await axios.post(sensorDataUrl);
         console.log(response.data);
 		const curPitch = parseFloat(response.data.pitch)
 		const curRoll = parseFloat(response.data.roll)
