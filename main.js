@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { MongoClient, ObjectId } = require("mongodb");
 const User = require("./user");
+const axios = require('axios');
 
 MongoClient.connect(
 	process.env.MONGO_URI,
@@ -56,6 +57,18 @@ app.use(express.urlencoded({ extended: false }))
 function updateSensorData(newPitch, newRoll) {
 	pitch = newPitch;
 	roll = newRoll;
+}
+
+async function getSensorData() {
+    try {
+        const response = await axios.post('/WEPOSE/sensorDataIMU');
+        console.log(response.data);
+		const curPitch = parseFloat(response.data.pitch)
+		const curRoll = parseFloat(response.data.roll)
+		updateSensorData(curPitch, curRoll)
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 /***************************************  USER FUNCTION  ***************************************/
@@ -209,20 +222,20 @@ app.delete('/UserProfile/DeleteAccount/:UserEmail', verifyToken, async (req, res
 })
 
 // define POST route to receive data from arduino
-app.post('/WEPOSE/sensorDataIMU', async (req, res) => {
-	let isDataReceived = false;
-	if (!isDataReceived) {
-		console.log("Receiving IMU data from sensor....");
-		const curPitch = parseFloat(req.body.pitch)
-		const curRoll = parseFloat(req.body.roll)
-		updateSensorData(curPitch, curRoll)
-		console.log("pitch: ", curPitch)
-		console.log("roll:", curRoll )
-		isDataReceived = true
-	}
+// app.post('/WEPOSE/sensorDataIMU', async (req, res) => {
+// 	let isDataReceived = false;
+// 	if (!isDataReceived) {
+// 		console.log("Receiving IMU data from sensor....");
+// 		const curPitch = parseFloat(req.body.pitch)
+// 		const curRoll = parseFloat(req.body.roll)
+// 		updateSensorData(curPitch, curRoll)
+// 		console.log("pitch: ", curPitch)
+// 		console.log("roll:", curRoll )
+// 		isDataReceived = true
+// 	}
 	
-	res.status(200).json({msg:"Data received!"});
-});
+// 	res.status(200).json({msg:"Data received!"});
+// });
 
 // Initialization step : Collect correct data for user for further classification
 app.get('/WEPOSE/initSitPosture', async (req, res) => {
@@ -231,6 +244,7 @@ app.get('/WEPOSE/initSitPosture', async (req, res) => {
 
 		// loop for take 30 datasets
 		for (j = 0; j < 30; j++) {
+			getSensorData();
 			data.push([pitch, roll])
 			console.log("pitch: ", pitch)
 			console.log("roll:", roll )	
@@ -272,7 +286,7 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 
 		// get the store data from database for prediction
 		const modelData = await User.getUserInitSitData("test@example.com");
-
+		getSensorData();
 		// get the current pitch and roll angle
 		const newSample = [[pitch, roll]];
 		console.log("Predict data:", newSample)
