@@ -3,6 +3,7 @@ require('dotenv').config();
 const { MongoClient, ObjectId } = require("mongodb");
 const User = require("./user");
 const { IsolationForest } = require('isolation-forest');
+const axios = require('axios');
 
 MongoClient.connect(
     // "mongodb+srv://chiam:chiam@cluster0.an2vt5v.mongodb.net/weposeAPI",
@@ -96,6 +97,11 @@ app.use(express.urlencoded({ extended: false }))
 // 	  });
 // 	});
 //   };
+
+function updateSensorData(newPitch, newRoll) {
+	pitch = newPitch;
+	roll = newRoll;
+  }
 
 /***************************************  USER FUNCTION  ***************************************/
 //         Register, Login, Update (Visitor and Admin), Delete, View Reservation Info              //
@@ -251,10 +257,11 @@ app.delete('/UserProfile/DeleteAccount/:UserEmail', verifyToken, async (req, res
 // define POST route to receive data from arduino
 app.post('/WEPOSE/sensorDataIMU', async (req, res) => {
 	console.log("Receiving IMU data from sensor....");
-	pitch = parseFloat(req.body.pitch)
-	roll = parseFloat(req.body.roll)
-	console.log("pitch: ", pitch)
-	console.log("roll:", roll )
+	const curPitch = parseFloat(req.body.pitch)
+	const curRoll = parseFloat(req.body.roll)
+	console.log("pitch: ", curPitch)
+	console.log("roll:", curRoll )
+	updateSensorData(curPitch, curRoll)
 	res.status(200).json({msg:"Data received!"});
 });
 
