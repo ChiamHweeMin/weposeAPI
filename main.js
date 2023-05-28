@@ -1,7 +1,6 @@
 require('dotenv').config();
 const { MongoClient, ObjectId } = require("mongodb");
 const User = require("./user");
-const axios = require('axios');
 
 MongoClient.connect(
 	process.env.MONGO_URI,
@@ -17,7 +16,6 @@ MongoClient.connect(
 const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000
-const sensorDataUrl = process.env.SENSOR_DATA_URL;
 
 let data = []; // store the received data
 let pitch = 0.0;
@@ -59,18 +57,6 @@ function updateSensorData(newPitch, newRoll) {
 	pitch = newPitch;
 	roll = newRoll;
 }
-
-// async function getSensorData() {
-//     try {
-//         const response = await axios.post(sensorDataUrl);
-//         console.log(response.data);
-// 		const curPitch = parseFloat(response.data.pitch)
-// 		const curRoll = parseFloat(response.data.roll)
-// 		updateSensorData(curPitch, curRoll)
-//     } catch (error) {
-//         console.log(error);
-//     }
-// }
 
 /***************************************  USER FUNCTION  ***************************************/
 app.get('/', async (req, res) => {
@@ -245,7 +231,6 @@ app.get('/WEPOSE/initSitPosture', async (req, res) => {
 
 		// loop for take 30 datasets
 		for (j = 0; j < 30; j++) {
-			await axios.get('https://web-production-23955.up.railway.app/WEPOSE/sensorDataIMU');
 			data.push([pitch, roll])
 			console.log("pitch: ", pitch)
 			console.log("roll:", roll )	
@@ -287,7 +272,7 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 
 		// get the store data from database for prediction
 		const modelData = await User.getUserInitSitData("test@example.com");
-		await axios.post('/WEPOSE/sensorDataIMU');
+
 		// get the current pitch and roll angle
 		const newSample = [[pitch, roll]];
 		console.log("Predict data:", newSample)
