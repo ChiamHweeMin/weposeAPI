@@ -499,7 +499,7 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		// 	console.error('An error occurred:', data.toString());
 		// });
 
-		return res.status(200).json({msg: "Success", cValue: newSample, pValue: prevSample, dff: diff, result: result});
+		return res.status(200).json({msg: "Success", cValue: newSample, dff: diff, result: result});
 
 		// res.status(200).json({ label: predictedLabel });
 	} catch (error) {
