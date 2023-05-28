@@ -63,8 +63,8 @@ async function getSensorData() {
 	try {
 	  const apiCall1 = axios.get('https://web-production-23955.up.railway.app/WEPOSE/sensorDataIMU');
   
-	  const response1 = await Promise.all(apiCall1);
-  
+	  const [response1] = await Promise.all([apiCall1]);
+	  console.log(response1)
 	  console.log(response1.data);
 	} catch (error) {
 	  console.error(error);
