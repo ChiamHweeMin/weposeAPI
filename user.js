@@ -161,6 +161,8 @@ class User {
             	UserEmail: email
             }, { 
 				$set: {
+					meanNormal: sample.meanNormal,
+					stdNormal: sample.stdNormal,
 					min_valueP: sample.min_valueP,
 					max_valueP: sample.max_valueP,
 					min_valueR: sample.min_valueR,
