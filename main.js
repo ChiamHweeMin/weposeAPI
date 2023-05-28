@@ -404,12 +404,12 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		// get the new data
 		// nPitch = (pitch - modelData.min_valueP) / (modelData.max_valueP - modelData.min_valueP) * (1 - (-1)) + (-1);
 		// nRoll = (roll - modelData.min_valueR) / (modelData.max_valueR - modelData.min_valueR) * (1 - (-1)) + (-1);
-		nPrevPitch = (pitch - modelData.meanNormal[0]) / modelData.stdNormal[0]
-		nPrevRoll = (roll - modelData.meanNormal[1]) / modelData.stdNormal[1]
+		nPrevPitch = (pitch - modelData.meanNormal[0]) / (modelData.stdNormal[0] / Math.sqrt(30))
+		nPrevRoll = (roll - modelData.meanNormal[1]) / (modelData.stdNormal[1] / Math.sqrt(30))
 
 		await new Promise(resolve => setTimeout(resolve, 1000));
-		nPitch = (pitch - modelData.meanNormal[0]) / modelData.stdNormal[0]
-		nRoll = (roll - modelData.meanNormal[1]) / modelData.stdNormal[1]
+		nPitch = (pitch - modelData.meanNormal[0]) / (modelData.stdNormal[0]/ Math.sqrt(30))
+		nRoll = (roll - modelData.meanNormal[1]) / (modelData.stdNormal[1] / Math.sqrt(30))
 
 		const newSample = [[nPitch, nRoll]];
 		console.log("Predict data:", newSample)
