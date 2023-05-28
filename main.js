@@ -401,7 +401,7 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		const newSample = [[pitch, roll]];
 		console.log("Predict data:", newSample)
 		
-		const threshold = 1.0;
+		const threshold = 0.3;
 		
 		const diff = newSample[0].map((val, index) => Math.abs(val - modelData.meanNormal[index]));
 		
