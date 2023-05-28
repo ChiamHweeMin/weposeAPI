@@ -251,7 +251,7 @@ app.get('/WEPOSE/initSitPosture', async (req, res) => {
 			stdNormal: stdNormal
 		}
 
-		await User.updateUserMinMaxInitSitData("test@example.com", sample)
+		await User.updateUserInitSitData("test@example.com", sample)
 
 		data = []; // after the model successfully stored, delete the data received from sensor for the next user
 

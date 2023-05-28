@@ -125,37 +125,12 @@ class User {
 		return { status: false, msg: "Email is not exits" }
 	}
 
+	// store the mean value and std value (initialization step) to database
 	static async updateUserInitSitData(email, sample) {
 		// Check if user exists
 		const isExists = await user.findOne({ UserEmail: email })
 		if (isExists) {
-			// Update the field Init Sit Data
-			console.log("Email match")
-			await user.updateOne({
-            	UserEmail: email
-            }, { 
-				$set: {
-					InitSitData: sample
-				} 
-			}, { upsert: true }).then (result => {
-                console.log(result)
-            }).catch((err) => {
-                    console.log('Error: ' + err);
-            })
-			const data = await user.findOne({ UserEmail: sample.UserEmail })
-			return data
-		}
-		else {
-			console.log("Email not match")
-			return { status: false }
-		}
-	}
-
-	static async updateUserMinMaxInitSitData(email, sample) {
-		// Check if user exists
-		const isExists = await user.findOne({ UserEmail: email })
-		if (isExists) {
-			// Update the field Init Sit Data
+			// Update the field mean normal and std normal
 			console.log("Email match")
 			await user.updateOne({
             	UserEmail: email
@@ -178,6 +153,7 @@ class User {
 		}
 	}
 
+	// get the mean data (from initialization) for each user
 	static async getUserInitSitData(email) {
 		// Check if user exists
 		const isExists = await user.findOne({ UserEmail: email })
@@ -190,8 +166,6 @@ class User {
 			return { status: false }
 		}
 	}
-
-
 
 }
 
