@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { MongoClient, ObjectId } = require("mongodb");
 const User = require("./user");
+const axios = require('axios');
 
 MongoClient.connect(
 	process.env.MONGO_URI,
