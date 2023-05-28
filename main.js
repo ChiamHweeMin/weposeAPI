@@ -413,7 +413,7 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		// nRoll = (roll - modelData.min_valueR) / (modelData.max_valueR - modelData.min_valueR) * (1 - (-1)) + (-1);
 		const nPrevPitch = (pitch - modelData.meanNormal[0]) / (modelData.stdNormal[0] / Math.sqrt(30))
 		const nPrevRoll = (roll - modelData.meanNormal[1]) / (modelData.stdNormal[1] / Math.sqrt(30))
-		const prevSample = [[nPrevPitch, nPrevRoll]]
+		const prevSample = [nPrevPitch, nPrevRoll]
 		await new Promise(resolve => setTimeout(resolve, 5000));
 		const nPitch = (pitch - modelData.meanNormal[0]) / (modelData.stdNormal[0]/ Math.sqrt(30))
 		const nRoll = (roll - modelData.meanNormal[1]) / (modelData.stdNormal[1] / Math.sqrt(30))
@@ -428,7 +428,7 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		// const diffPitch = Math.abs(nPitch - nPrevPitch);
 		// const diffRoll = Math.abs(nRoll - nPrevRoll);
 
-		const diff = newSample[0].map((val, index) => Math.abs(val - prevSample[0]));
+		const diff = newSample[0].map((val, index) => Math.abs(val - prevSample[index]));
 		console.log(diff)
 		// if (diff.some(val => val > threshold)) {
 
