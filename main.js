@@ -406,7 +406,7 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		// nRoll = (roll - modelData.min_valueR) / (modelData.max_valueR - modelData.min_valueR) * (1 - (-1)) + (-1);
 		nPrevPitch = (pitch - modelData.meanNormal[0]) / (modelData.stdNormal[0] / Math.sqrt(30))
 		nPrevRoll = (roll - modelData.meanNormal[1]) / (modelData.stdNormal[1] / Math.sqrt(30))
-
+		const prevSample = [[nPrevPitch, nPrevRoll]]
 		await new Promise(resolve => setTimeout(resolve, 1000));
 		nPitch = (pitch - modelData.meanNormal[0]) / (modelData.stdNormal[0]/ Math.sqrt(30))
 		nRoll = (roll - modelData.meanNormal[1]) / (modelData.stdNormal[1] / Math.sqrt(30))
@@ -423,12 +423,12 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 
 		console.log("Diff Pitch:", diffPitch);
 		console.log("Diff Roll:", diffRoll);
-
+		var result = ""
 		// 根据差异进行预测
 		if (diffPitch > threshold || diffRoll > threshold) {
-			console.log("异常数据");
+			result = "Abnormal";
 		} else {
-			console.log("正常数据");
+			result = "Normal";
 		}
 
 		// if(n)
@@ -491,7 +491,7 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 		nPitch = 0.0;
 		nRoll = 0.0;
 
-		return res.status(200).json({msg: "Success"});
+		return res.status(200).json({msg: "Success", cValue: newSample, pValue: prevSample, result: result});
 
 		// res.status(200).json({ label: predictedLabel });
 	} catch (error) {
