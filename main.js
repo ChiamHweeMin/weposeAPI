@@ -245,7 +245,7 @@ app.get('/WEPOSE/initSitPosture', async (req, res) => {
 
 		// loop for take 30 datasets
 		for (j = 0; j < 30; j++) {
-			await axios.post('/WEPOSE/sensorDataIMU');
+			await axios.post('https://web-production-23955.up.railway.app/WEPOSE/sensorDataIMU');
 			data.push([pitch, roll])
 			console.log("pitch: ", pitch)
 			console.log("roll:", roll )	
