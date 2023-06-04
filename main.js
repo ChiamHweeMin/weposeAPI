@@ -300,7 +300,9 @@ app.get('/WEPOSE/predictSitPosture', async (req, res) => {
 			dff: diff,
 			pitch: newSample[0][0], 
 			roll: newSample[0][1],
-			prediction: result
+			prediction: result,
+			meanPitch: modelData.meanNormal[0],
+			meanRoll: modelData.meanNormal[1]
 		});
 	} catch (error) {
 		console.error('An error occurred:', error);
