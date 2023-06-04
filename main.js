@@ -253,9 +253,9 @@ app.get('/WEPOSE/initSitPosture/:UserEmail', async (req, res) => {
 			stdNormal: stdNormal
 		}
 
-		const dataUser = await User.updateUserInitSitData(req.params.UserEmail, sample)
-		const meanPitch = dataUser.meanNormal[0];
-		const meanRoll = dataUser.meanNormal[1]; 
+		await User.updateUserInitSitData(req.params.UserEmail, sample)
+		const meanPitch = meanNormal[0];
+		const meanRoll = meanNormal[1]; 
 
 		data = []; // after the model successfully stored, delete the data received from sensor for the next user
 
