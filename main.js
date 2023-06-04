@@ -367,14 +367,18 @@ app.post('/WEPOSE/sendSlouchCount/:UserEmail', async (req, res) => {
 
 
 app.get('/WEPOSE/dataDateUsage/:UserEmail', async (req, res) => {
+	try {
+		console.log("User Get DateUsage:")
 
-	console.log("User Get DateUsage:")
-
-	const user = await Date.getDateUsage(req.params.UserEmail);
-	if (user.status == false) {
-		return res.status(400).json({success: false, msg: "No data"})
-	}
-	return res.status(200).json(user, {success: true})
+		const user = await Date.getDateUsage(req.params.UserEmail);
+		if (user.status == false) {
+			return res.status(400).json({success: false, msg: "No data"})
+		}
+		return res.status(200).json({success: true, data: user})
+	} catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, msg: "Internal server error" });
+    }
 
 });
 
