@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { MongoClient, ObjectId } = require("mongodb");
 const User = require("./user");
+const Date = require("./date");
 
 MongoClient.connect(
 	process.env.MONGO_URI,
@@ -11,6 +12,7 @@ MongoClient.connect(
 }).then(async client => {
 	console.log('Connected to MongoDB');
 	User.injectDB(client);
+	Date.injectDB(client);
 })
 
 const express = require('express')
@@ -338,6 +340,43 @@ app.get('/test', async (req, res) => {
 		res.send(data1);
 	});
 })
+
+
+app.post('/WEPOSE/sendSlouchCount/:UserEmail', async (req, res) => {
+
+	console.log("User Update DataUsage:")
+	console.log(req.body);
+
+	const { date, ElapsedTime, SlouchCount } = req.body;
+
+    if (!date || !ElapsedTime || !SlouchCount) {
+      return res.status(400).json({ success: false, msg: "Missing required fields." });
+    }
+
+	const parsedElapsedTime = parseInt(ElapsedTime, 10);
+	const parsedSlouchCount = parseInt(SlouchCount, 10);
+	schemaUser = {
+		date: date,
+		ElapsedTime: parsedElapsedTime,
+		SlouchCount: parsedSlouchCount
+	}
+	await User.updateDateUsage(req.params.UserEmail, schemaUser);
+
+	return res.status(200).json({success: true})
+});
+
+
+app.get('/WEPOSE/dataDateUsage/:UserEmail', async (req, res) => {
+
+	console.log("User Get DateUsage:")
+
+	const user = await User.getDateUsage(req.params.UserEmail);
+	if (user.status == "false") {
+		return res.status(400).json({success: false, msg: "No data"})
+	}
+	return res.status(200).json(user, {success: true})
+
+});
 
 app.listen(port, () => {
 	console.log(`Example app listening on port ${port}`)
