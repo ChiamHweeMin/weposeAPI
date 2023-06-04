@@ -371,7 +371,7 @@ app.get('/WEPOSE/dataDateUsage/:UserEmail', async (req, res) => {
 	console.log("User Get DateUsage:")
 
 	const user = await Date.getDateUsage(req.params.UserEmail);
-	if (user.status == "false") {
+	if (user.status == false) {
 		return res.status(400).json({success: false, msg: "No data"})
 	}
 	return res.status(200).json(user, {success: true})
