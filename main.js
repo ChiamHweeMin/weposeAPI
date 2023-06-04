@@ -109,6 +109,8 @@ app.post('/loginUser', async (req, res) => {
 		success: true,
 		UserName: user.UserName,
 		UserEmail: user.UserEmail,
+		meanPitch: user.meanNormal[0],
+		meanRoll: user.meanNormal[1],
 		role: user.role,
 		token: generateAccessToken({
 			UserEmail: user.UserEmail,
@@ -225,7 +227,7 @@ app.post('/WEPOSE/sensorDataIMU', async (req, res) => {
 });
 
 // Initialization step : Collect correct data for user for further classification
-app.get('/WEPOSE/initSitPosture', async (req, res) => {
+app.get('/WEPOSE/initSitPosture/:UserEmail', async (req, res) => {
 	try {
 		console.log("Initialization:")
 
@@ -251,13 +253,13 @@ app.get('/WEPOSE/initSitPosture', async (req, res) => {
 			stdNormal: stdNormal
 		}
 
-		await User.updateUserInitSitData("test@example.com", sample)
+		const data = await User.updateUserInitSitData(req.params.UserEmail, sample)
 
 		data = []; // after the model successfully stored, delete the data received from sensor for the next user
 
 		console.log("SUCCESS store model into database")
 		
-		return res.status(200).json({msg: "Success"});
+		return res.status(200).json({msg: "Success", meanPitch: data.meanNormal[0], meanRoll: data.meanNormal[1]});
 	} catch (error) {
 		console.error('An error occurred:', error);
 		res.status(500).json({ error: 'Internal Server Error' });
@@ -266,12 +268,12 @@ app.get('/WEPOSE/initSitPosture', async (req, res) => {
 })
 
 // Initialization step : Collect correct data for user for further classification
-app.get('/WEPOSE/predictSitPosture', async (req, res) => {
+app.get('/WEPOSE/predictSitPosture/:UserEmail', async (req, res) => {
 	try {
 		console.log("Prediction Test:")
 
 		// get the store data from database for prediction
-		const modelData = await User.getUserInitSitData("test@example.com");
+		const modelData = await User.getUserInitSitData(req.params.UserEmail);
 
 		// get the current pitch and roll angle
 		const newSample = [[pitch, roll]];

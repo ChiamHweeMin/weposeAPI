@@ -23,6 +23,7 @@ class User {
 					UserName: sample.UserName,
 					UserPassword: passwordHash,
 					UserEmail: sample.UserEmail,
+					meanNormal: [0.0, 0.0],
 					role: "user"
 				}).then (result => {
 					console.log(result)
