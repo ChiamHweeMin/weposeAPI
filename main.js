@@ -18,6 +18,7 @@ const app = express()
 const port = process.env.PORT || 3000
 
 let data = []; // store the received data
+let previousClassification = ""
 let pitch = 0.0;
 let roll = 0.0;
 let j = 0;
@@ -286,16 +287,22 @@ app.get('/WEPOSE/predictSitPosture/:UserEmail', async (req, res) => {
 		console.log(diff)
 
 		var classify = ""
-		let result = -1
+		let result = 0
 		
 		// Perform prediction based on difference with the mean value
 		if (diff.some(val => val > threshold))  {
 			classify = "Abnormal"
-			result = 0
+			if (previousClassification == "Normal" && classify == "Abnormal") {
+				result = 1;
+			}
 		} else {
 			classify = "Normal"
-			result = 1
+			result = 0
 		}
+
+		previousClassification = classify;
+		
+		
 
 		return res.status(200).json({
 			success: true, 
