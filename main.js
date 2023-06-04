@@ -253,13 +253,14 @@ app.get('/WEPOSE/initSitPosture/:UserEmail', async (req, res) => {
 			stdNormal: stdNormal
 		}
 
-		await User.updateUserInitSitData(req.params.UserEmail, sample)
+		const user = await User.updateUserInitSitData(req.params.UserEmail, sample)
 
 		data = []; // after the model successfully stored, delete the data received from sensor for the next user
 
 		console.log("SUCCESS store model into database")
+
 		
-		return res.status(200).json({msg: "Success", meanPitch: meanNormal[0], meanRoll: meanNormal[1]});
+		return res.status(200).json({msg: "Success", meanPitch: user.meanNormal[0], meanRoll: user.meanNormal[1]});
 	} catch (error) {
 		console.error('An error occurred:', error);
 		res.status(500).json({ error: 'Internal Server Error' });
