@@ -264,7 +264,7 @@ app.get('/WEPOSE/initSitPosture/:UserEmail', async (req, res) => {
 		console.log("SUCCESS store model into database")
 
 		
-		return res.status(200).json({msg: "Success"});
+		return res.status(200).json({success: true});
 	} catch (error) {
 		console.error('An error occurred:', error);
 		res.status(500).json({ error: 'Internal Server Error' });
