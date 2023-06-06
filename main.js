@@ -1,6 +1,6 @@
 require('dotenv').config();
 const { MongoClient, ObjectId } = require("mongodb");
-const { IsolationForest } = require('isolation-forest');
+// const { IsolationForest } = require('isolation-forest');
 const User = require("./user");
 const Date = require("./date");
 
@@ -244,27 +244,27 @@ app.get('/WEPOSE/initSitPosture/:UserEmail', async (req, res) => {
 	
 			await new Promise(resolve => setTimeout(resolve, 1000)); // Sleep for 1 second before collecting the next data point
 		}
-		// const meanNormal = data.reduce((acc, curr) => {
-		// 	return acc.map((sum, index) => sum + curr[index]);
-		// }, new Array(data[0].length).fill(0)).map(sum => sum / data.length);
+		const meanNormal = data.reduce((acc, curr) => {
+			return acc.map((sum, index) => sum + curr[index]);
+		}, new Array(data[0].length).fill(0)).map(sum => sum / data.length);
 		
-		// const stdNormal = data.reduce((acc, curr) => {
-		// 	return acc.map((sum, index) => sum + Math.pow(curr[index] - meanNormal[index], 2));
-		// }, new Array(data[0].length).fill(0)).map(sum => Math.sqrt(sum / data.length));	
+		const stdNormal = data.reduce((acc, curr) => {
+			return acc.map((sum, index) => sum + Math.pow(curr[index] - meanNormal[index], 2));
+		}, new Array(data[0].length).fill(0)).map(sum => Math.sqrt(sum / data.length));	
 
 		
-		// sample = {
-		// 	meanNormal: meanNormal,
-		// 	stdNormal: stdNormal
-		// }
+		sample = {
+			meanNormal: meanNormal,
+			stdNormal: stdNormal
+		}
 
-		const iforest = new IsolationForest((nEstimators=100,maxSamples='auto',maxFeatures=1.0, contamination=0.1));
-		iforest.fit(data);
+		// const iforest = new IsolationForest((nEstimators=100,maxSamples='auto',maxFeatures=1.0, contamination=0.1));
+		// iforest.fit(data);
 		
 		// const serializedModel = JSON.stringify(iforest);
 		// console.log(serializedModel)
-		console.log(iforest)
-		await User.updateUserInitSitData(req.params.UserEmail, iforest)
+		// console.log(iforest)
+		await User.updateUserInitSitData(req.params.UserEmail, sample)
 
 		// data = []; // after the model successfully stored, delete the data received from sensor for the next user
 
@@ -287,46 +287,23 @@ app.get('/WEPOSE/predictSitPosture/:UserEmail', async (req, res) => {
 		// get the store data from database for prediction
 		const modelData = await User.getUserInitSitData(req.params.UserEmail);
 		// const iforest = modelData.model as IsolationForest;
-		const iforest = IsolationForest(modelData);
-		console.log(iforest)
+		// const iforest = IsolationForest(modelData);
+		// console.log(iforest)
 
 		// get the current pitch and roll angle
 		const newSample = [[pitch, roll]];
 		console.log("Predict data:", newSample)
 		
-		// const threshold = 10;
+		const threshold = 10;
 
-		// const diff = newSample[0].map((val, index) => Math.abs(val - modelData.meanNormal[index]));
-		// console.log(diff)
-
-		// var classify = ""
-		// let result = 0
-		
-		// // Perform prediction based on difference with the mean value
-		// if (diff.some(val => val > threshold))  {
-		// 	classify = "Abnormal"
-		// 	if (previousClassification == "Normal" && classify == "Abnormal") {
-		// 		result = 1;
-		// 	}
-		// } else {
-		// 	classify = "Normal"
-		// 	result = 0
-		// }
-
-		// previousClassification = classify;
+		const diff = newSample[0].map((val, index) => Math.abs(val - modelData.meanNormal[index]));
+		console.log(diff)
 
 		var classify = ""
 		let result = 0
 		
-		const scores = iforest.predict(newSample);
-		console.log(scores)
-		const threshold = 0.07; // 设置阈值
-		// if (scores < threshold) {
-		// 	console.log('新数据被判断为异常样本');
-		// } else {
-		// 	console.log('新数据被判断为正常样本');
-		// }
-		if (scores < threshold)  {
+		// Perform prediction based on difference with the mean value
+		if (diff.some(val => val > threshold))  {
 			classify = "Abnormal"
 			if (previousClassification == "Normal" && classify == "Abnormal") {
 				result = 1;
@@ -338,15 +315,38 @@ app.get('/WEPOSE/predictSitPosture/:UserEmail', async (req, res) => {
 
 		previousClassification = classify;
 
+		// var classify = ""
+		// let result = 0
+		
+		// const scores = iforest.predict(newSample);
+		// console.log(scores)
+		// const threshold = 0.07; 
+		// if (scores < threshold) {
+		// 	console.log('Abnormal');
+		// } else {
+		// 	console.log('normal');
+		// }
+		// if (scores < threshold)  {
+		// 	classify = "Abnormal"
+		// 	if (previousClassification == "Normal" && classify == "Abnormal") {
+		// 		result = 1;
+		// 	}
+		// } else {
+		// 	classify = "Normal"
+		// 	result = 0
+		// }
+
+		previousClassification = classify;
+
 		return res.status(200).json({
 			success: true, 
 			cValue: newSample, 
-			score: scores,
+			dif: diff,
 			pitch: newSample[0][0], 
 			roll: newSample[0][1],
-			prediction: result
-			// meanPitch: modelData.meanNormal[0],
-			// meanRoll: modelData.meanNormal[1]
+			prediction: result,
+			meanPitch: modelData.meanNormal[0],
+			meanRoll: modelData.meanNormal[1]
 		});
 	} catch (error) {
 		console.error('An error occurred:', error);
