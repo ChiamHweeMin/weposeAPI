@@ -261,9 +261,10 @@ app.get('/WEPOSE/initSitPosture/:UserEmail', async (req, res) => {
 		const iforest = new IsolationForest((nEstimators=100,maxSamples='auto',maxFeatures=1.0, contamination=0.1));
 		iforest.fit(data);
 		
-		const serializedModel = JSON.stringify(iforest);
-		console.log(serializedModel)
-		await User.updateUserInitSitData(req.params.UserEmail, serializedModel)
+		// const serializedModel = JSON.stringify(iforest);
+		// console.log(serializedModel)
+		console.log(iforest)
+		await User.updateUserInitSitData(req.params.UserEmail, iforest)
 
 		// data = []; // after the model successfully stored, delete the data received from sensor for the next user
 
@@ -286,7 +287,7 @@ app.get('/WEPOSE/predictSitPosture/:UserEmail', async (req, res) => {
 		// get the store data from database for prediction
 		const modelData = await User.getUserInitSitData(req.params.UserEmail);
 		// const iforest = modelData.model as IsolationForest;
-		const iforest = new IsolationForest((JSON.parse(modelData)));
+		const iforest = new IsolationForest((modelData));
 		console.log(iforest)
 
 		// get the current pitch and roll angle
