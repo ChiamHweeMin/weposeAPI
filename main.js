@@ -344,8 +344,8 @@ app.get('/WEPOSE/predictSitPosture/:UserEmail', async (req, res) => {
 			pitch: newSample[0][0], 
 			roll: newSample[0][1],
 			prediction: result,
-			meanPitch: modelData.meanNormal[0],
-			meanRoll: modelData.meanNormal[1]
+			// meanPitch: modelData.meanNormal[0],
+			// meanRoll: modelData.meanNormal[1]
 		});
 	} catch (error) {
 		console.error('An error occurred:', error);
