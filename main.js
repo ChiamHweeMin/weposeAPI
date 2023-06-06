@@ -343,7 +343,7 @@ app.get('/WEPOSE/predictSitPosture/:UserEmail', async (req, res) => {
 			score: scores,
 			pitch: newSample[0][0], 
 			roll: newSample[0][1],
-			prediction: result,
+			prediction: result
 			// meanPitch: modelData.meanNormal[0],
 			// meanRoll: modelData.meanNormal[1]
 		});
