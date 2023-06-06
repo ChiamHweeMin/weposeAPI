@@ -260,7 +260,10 @@ app.get('/WEPOSE/initSitPosture/:UserEmail', async (req, res) => {
 
 		const iforest = new IsolationForest((nEstimators=100,maxSamples='auto',maxFeatures=1.0, contamination=0.1));
 		iforest.fit(data);
-		await User.updateUserInitSitData(req.params.UserEmail, iforest)
+		
+		const serializedModel = JSON.stringify(iforest);
+		console.log(serializedModel)
+		await User.updateUserInitSitData(req.params.UserEmail, serializedModel)
 
 		// data = []; // after the model successfully stored, delete the data received from sensor for the next user
 
@@ -282,6 +285,9 @@ app.get('/WEPOSE/predictSitPosture/:UserEmail', async (req, res) => {
 
 		// get the store data from database for prediction
 		const modelData = await User.getUserInitSitData(req.params.UserEmail);
+		// const iforest = modelData.model as IsolationForest;
+		const iforest = new IsolationForest(JSON.parse(modelData));
+
 
 		// get the current pitch and roll angle
 		const newSample = [[pitch, roll]];
@@ -310,8 +316,8 @@ app.get('/WEPOSE/predictSitPosture/:UserEmail', async (req, res) => {
 
 		var classify = ""
 		let result = 0
-
-		const scores = modelData.predict(newSample);
+		
+		const scores = iforest.predict(newSample);
 		console.log(scores)
 		const threshold = 0.07; // 设置阈值
 		// if (scores < threshold) {
