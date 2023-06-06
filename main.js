@@ -287,7 +287,7 @@ app.get('/WEPOSE/predictSitPosture/:UserEmail', async (req, res) => {
 		const modelData = await User.getUserInitSitData(req.params.UserEmail);
 		// const iforest = modelData.model as IsolationForest;
 		const iforest = new IsolationForest(JSON.parse(modelData));
-
+		console.log(iforest)
 
 		// get the current pitch and roll angle
 		const newSample = [[pitch, roll]];
