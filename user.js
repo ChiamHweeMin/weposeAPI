@@ -126,7 +126,34 @@ class User {
 		return { status: false, msg: "Email is not exits" }
 	}
 
-	// store the mean value and std value (initialization step) to database
+	// // store the mean value and std value (initialization step) to database
+	// static async updateUserInitSitData(email, sample) {
+	// 	// Check if user exists
+	// 	const isExists = await user.findOne({ UserEmail: email })
+	// 	if (isExists) {
+	// 		// Update the field mean normal and std normal
+	// 		console.log("Email match")
+	// 		await user.updateOne({
+    //         	UserEmail: email
+    //         }, { 
+	// 			$set: {
+	// 				meanNormal: sample.meanNormal,
+	// 				stdNormal: sample.stdNormal
+	// 			} 
+	// 		}, { upsert: true }).then (result => {
+    //             console.log(result)
+    //         }).catch((err) => {
+    //                 console.log('Error: ' + err);
+    //         })
+	// 		const data = await user.findOne({ UserEmail: sample.UserEmail })
+	// 		return data
+	// 	}
+	// 	else {
+	// 		console.log("Email not match")
+	// 		return { status: false }
+	// 	}
+	// }
+
 	static async updateUserInitSitData(email, sample) {
 		// Check if user exists
 		const isExists = await user.findOne({ UserEmail: email })
@@ -137,8 +164,7 @@ class User {
             	UserEmail: email
             }, { 
 				$set: {
-					meanNormal: sample.meanNormal,
-					stdNormal: sample.stdNormal
+					model: sample
 				} 
 			}, { upsert: true }).then (result => {
                 console.log(result)
@@ -160,13 +186,26 @@ class User {
 		const isExists = await user.findOne({ UserEmail: email })
 		if (isExists) {
 			console.log("Email match")
-			return isExists
+			return isExists.model
 		}
 		else {
 			console.log("Email not match")
 			return { status: false }
 		}
 	}
+
+	// static async getUserInitSitData(email) {
+	// 	// Check if user exists
+	// 	const isExists = await user.findOne({ UserEmail: email })
+	// 	if (isExists) {
+	// 		console.log("Email match")
+	// 		return isExists
+	// 	}
+	// 	else {
+	// 		console.log("Email not match")
+	// 		return { status: false }
+	// 	}
+	// }
 
 }
 

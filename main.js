@@ -1,5 +1,6 @@
 require('dotenv').config();
 const { MongoClient, ObjectId } = require("mongodb");
+const { IsolationForest } = require('isolation-forest');
 const User = require("./user");
 const Date = require("./date");
 
@@ -243,21 +244,23 @@ app.get('/WEPOSE/initSitPosture/:UserEmail', async (req, res) => {
 	
 			await new Promise(resolve => setTimeout(resolve, 1000)); // Sleep for 1 second before collecting the next data point
 		}
-		const meanNormal = data.reduce((acc, curr) => {
-			return acc.map((sum, index) => sum + curr[index]);
-		}, new Array(data[0].length).fill(0)).map(sum => sum / data.length);
+		// const meanNormal = data.reduce((acc, curr) => {
+		// 	return acc.map((sum, index) => sum + curr[index]);
+		// }, new Array(data[0].length).fill(0)).map(sum => sum / data.length);
 		
-		const stdNormal = data.reduce((acc, curr) => {
-			return acc.map((sum, index) => sum + Math.pow(curr[index] - meanNormal[index], 2));
-		}, new Array(data[0].length).fill(0)).map(sum => Math.sqrt(sum / data.length));	
+		// const stdNormal = data.reduce((acc, curr) => {
+		// 	return acc.map((sum, index) => sum + Math.pow(curr[index] - meanNormal[index], 2));
+		// }, new Array(data[0].length).fill(0)).map(sum => Math.sqrt(sum / data.length));	
 
 		
-		sample = {
-			meanNormal: meanNormal,
-			stdNormal: stdNormal
-		}
+		// sample = {
+		// 	meanNormal: meanNormal,
+		// 	stdNormal: stdNormal
+		// }
 
-		await User.updateUserInitSitData(req.params.UserEmail, sample)
+		const iforest = new IsolationForest((nEstimators=100,maxSamples='auto',maxFeatures=1.0, contamination=0.1));
+		iforest.fit(data);
+		await User.updateUserInitSitData(req.params.UserEmail, iforest)
 
 		// data = []; // after the model successfully stored, delete the data received from sensor for the next user
 
@@ -284,16 +287,39 @@ app.get('/WEPOSE/predictSitPosture/:UserEmail', async (req, res) => {
 		const newSample = [[pitch, roll]];
 		console.log("Predict data:", newSample)
 		
-		const threshold = 10;
+		// const threshold = 10;
 
-		const diff = newSample[0].map((val, index) => Math.abs(val - modelData.meanNormal[index]));
-		console.log(diff)
+		// const diff = newSample[0].map((val, index) => Math.abs(val - modelData.meanNormal[index]));
+		// console.log(diff)
+
+		// var classify = ""
+		// let result = 0
+		
+		// // Perform prediction based on difference with the mean value
+		// if (diff.some(val => val > threshold))  {
+		// 	classify = "Abnormal"
+		// 	if (previousClassification == "Normal" && classify == "Abnormal") {
+		// 		result = 1;
+		// 	}
+		// } else {
+		// 	classify = "Normal"
+		// 	result = 0
+		// }
+
+		// previousClassification = classify;
 
 		var classify = ""
 		let result = 0
-		
-		// Perform prediction based on difference with the mean value
-		if (diff.some(val => val > threshold))  {
+
+		const scores = modelData.predict(newSample);
+		console.log(scores)
+		const threshold = 0.07; // 设置阈值
+		// if (scores < threshold) {
+		// 	console.log('新数据被判断为异常样本');
+		// } else {
+		// 	console.log('新数据被判断为正常样本');
+		// }
+		if (scores < threshold)  {
 			classify = "Abnormal"
 			if (previousClassification == "Normal" && classify == "Abnormal") {
 				result = 1;
@@ -304,13 +330,11 @@ app.get('/WEPOSE/predictSitPosture/:UserEmail', async (req, res) => {
 		}
 
 		previousClassification = classify;
-		
-		
 
 		return res.status(200).json({
 			success: true, 
 			cValue: newSample, 
-			dff: diff,
+			score: scores,
 			pitch: newSample[0][0], 
 			roll: newSample[0][1],
 			prediction: result,
