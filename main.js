@@ -20,7 +20,7 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000
 
-// let data = []; // store the received data
+let data = []; // store the received data
 let previousClassification = ""
 let pitch = 0.0;
 let roll = 0.0;
@@ -234,7 +234,7 @@ app.post('/WEPOSE/sensorDataIMU', async (req, res) => {
 app.get('/WEPOSE/initSitPosture/:UserEmail', async (req, res) => {
 	try {
 		console.log("Initialization:")
-		const data = []; // Initialize the data array
+		// const data = []; // Initialize the data array
 
 		// loop for take 60 datasets
 		for (j = 0; j < 60; j++) {
@@ -266,7 +266,7 @@ app.get('/WEPOSE/initSitPosture/:UserEmail', async (req, res) => {
 		// console.log(iforest)
 		await User.updateUserInitSitData(req.params.UserEmail, sample)
 
-		// data = []; // after the model successfully stored, delete the data received from sensor for the next user
+		data = []; // after the model successfully stored, delete the data received from sensor for the next user
 
 		console.log("SUCCESS store model into database")
 
