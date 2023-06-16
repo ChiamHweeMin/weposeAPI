@@ -235,16 +235,15 @@ app.get('/WEPOSE/initSitPosture/:UserEmail', async (req, res) => {
 	try {
 		console.log("Initialization:")
 		const data = []; // Initialize the data array
-		console.log("Data1:", data.length)
-		// loop for take 60 datasets
-		for (j = 0; j < 60; j++) {
+
+		// loop for take 30 datasets
+		for (j = 0; j < 30; j++) {
 			data.push([pitch, roll])
 			console.log("pitch: ", pitch)
 			console.log("roll:", roll )	
-			console.log("Data2:", data.length)
+	
 			await new Promise(resolve => setTimeout(resolve, 1000)); // Sleep for 1 second before collecting the next data point
 		}
-		console.log("Data3:", data.length)
 		const meanNormal = data.reduce((acc, curr) => {
 			return acc.map((sum, index) => sum + curr[index]);
 		}, new Array(data[0].length).fill(0)).map(sum => sum / data.length);
