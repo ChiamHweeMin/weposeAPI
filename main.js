@@ -236,8 +236,8 @@ app.get('/WEPOSE/initSitPosture/:UserEmail', async (req, res) => {
 		console.log("Initialization:")
 		const data = []; // Initialize the data array
 
-		// loop for take 30 datasets
-		for (j = 0; j < 30; j++) {
+		// loop for take 60 datasets
+		for (j = 0; j < 60; j++) {
 			data.push([pitch, roll])
 			console.log("pitch: ", pitch)
 			console.log("roll:", roll )	
